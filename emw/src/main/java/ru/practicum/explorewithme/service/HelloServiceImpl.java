@@ -19,7 +19,7 @@ public class HelloServiceImpl implements HelloService {
     public String sendHello(HttpServletRequest request) {
         HitDto hitDto = new HitDto();
         hitDto.setUri(request.getRequestURI());
-        hitDto.setApp("Hello app");
+        hitDto.setApp("ewm-main-service");
         hitDto.setIp(request.getRemoteAddr());
         LocalDateTime timestamp = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");

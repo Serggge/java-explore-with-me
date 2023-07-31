@@ -14,17 +14,17 @@ import java.util.Map;
 
 public class StatClientImpl implements StatClient {
 
-    private final String STAT_SERVICE_URI;
+    private final String stat_service_uri;
     private final RestTemplate restTemplate;
 
     protected StatClientImpl(String uri) {
-        this.STAT_SERVICE_URI = uri;
+        this.stat_service_uri = uri;
         this.restTemplate = new RestTemplate();
     }
 
     public HitDto sendHit(HitDto hitDto) {
         HttpEntity<HitDto> request = new HttpEntity<>(hitDto);
-        return restTemplate.postForObject(STAT_SERVICE_URI + "/hit", request, HitDto.class);
+        return restTemplate.postForObject(stat_service_uri + "/hit", request, HitDto.class);
     }
 
     public List<StatisticDto> getStatisticByParams(Map<String, String> params) {
@@ -33,7 +33,7 @@ public class StatClientImpl implements StatClient {
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
         params.forEach(map::add);
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
-        ListStatisticDto wrapperList = restTemplate.getForObject(STAT_SERVICE_URI + "/stats",
+        ListStatisticDto wrapperList = restTemplate.getForObject(stat_service_uri + "/stats",
                 ListStatisticDto.class, request);
         return wrapperList.getStatistic();
     }
