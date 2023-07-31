@@ -27,7 +27,7 @@ services:
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=root
 
-  ewm-server:
+  ewm-service:
     build: ./emw
     image: emw_image
     container_name: explore_emw_server
