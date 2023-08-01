@@ -9,42 +9,49 @@ import java.util.List;
 
 public interface StatRepository extends JpaRepository<Statistic, Long> {
 
-    @Query("select new ru.practicum.explorewithme.model.CountByApp(app.uri, app.name, count(stat.id)) " +
+    @Query("select new ru.practicum.explorewithme.model.CountByApp(app.name, app.uri, count(distinct stat.ip)) " +
+            "from Statistic stat " +
+            "join stat.app app " +
+            "where app.uri = :uri " +
+            "group by app.name, app.uri")
+    CountByApp findStatistic(String uri);
+
+    @Query("select new ru.practicum.explorewithme.model.CountByApp(app.name, app.uri, count(distinct stat.ip)) " +
             "from Statistic stat " +
             "join stat.app app " +
             "where stat.timestamp > :start " +
             "and stat.timestamp < :end " +
-            "group by app.uri, app.name " +
-            "order by count(stat.id) desc")
+            "group by app.name, app.uri " +
+            "order by count(stat.ip) desc")
     List<CountByApp> findStatistic(LocalDateTime start, LocalDateTime end);
 
-    @Query("select new ru.practicum.explorewithme.model.CountByApp(app.uri, app.name, count(stat.id)) " +
+    @Query("select new ru.practicum.explorewithme.model.CountByApp(app.name, app.uri, count(distinct stat.ip)) " +
             "from Statistic stat " +
             "join stat.app app " +
             "where stat.timestamp > :start " +
             "and stat.timestamp < :end " +
             "and app.uri in :uris " +
-            "group by app.uri, app.name " +
-            "order by count(stat.id) desc")
+            "group by app.name, app.uri " +
+            "order by count(stat.ip) desc")
     List<CountByApp> findStatistic(LocalDateTime start, LocalDateTime end, String[] uris);
 
-    @Query("select new ru.practicum.explorewithme.model.CountByApp(app.uri, app.name, count(distinct app.id)) " +
+    @Query("select new ru.practicum.explorewithme.model.CountByApp(app.name, app.uri, count(distinct stat.ip)) " +
             "from Statistic stat " +
             "join stat.app app " +
             "where stat.timestamp > :start " +
             "and stat.timestamp < :end " +
-            "group by app.uri, app.name " +
-            "order by count(stat.id) desc")
+            "group by app.name, app.uri " +
+            "order by count(stat.ip) desc")
     List<CountByApp> findUniqueStatistic(LocalDateTime start, LocalDateTime end);
 
-    @Query("select new ru.practicum.explorewithme.model.CountByApp(app.uri, app.name, count(distinct app.id)) " +
+    @Query("select new ru.practicum.explorewithme.model.CountByApp(app.name, app.uri, count(distinct stat.ip)) " +
             "from Statistic stat " +
             "join stat.app app " +
             "where stat.timestamp > :start " +
             "and stat.timestamp < :end " +
             "and app.uri in :uris " +
-            "group by app.uri, app.name " +
-            "order by count(stat.id) desc")
+            "group by app.name, app.uri " +
+            "order by count(stat.ip) desc")
     List<CountByApp> findUniqueStatistic(LocalDateTime start, LocalDateTime end, String[] uris);
 
 }

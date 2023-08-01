@@ -6,8 +6,8 @@ import java.util.List;
 
 public interface StatService {
 
-    void addHit(HitDto hitDto);
+    StatisticDto addHit(HitDto hitDto);
 
-    List<StatisticDto> getStatistic(String start, String end, String[] uris, Boolean unique);
+    List<StatisticDto> getStatistic(String start, String end, String uris, Boolean unique);
 
 }

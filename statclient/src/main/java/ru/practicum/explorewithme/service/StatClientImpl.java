@@ -1,16 +1,15 @@
 package ru.practicum.explorewithme.service;
 
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import ru.practicum.explorewithme.dto.HitDto;
 import ru.practicum.explorewithme.dto.ListStatisticDto;
 import ru.practicum.explorewithme.dto.StatisticDto;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import static java.util.stream.Collectors.joining;
 
 public class StatClientImpl implements StatClient {
 
@@ -22,20 +21,22 @@ public class StatClientImpl implements StatClient {
         this.restTemplate = new RestTemplate();
     }
 
-    public HitDto sendHit(HitDto hitDto) {
+    public StatisticDto sendHit(HitDto hitDto) {
         HttpEntity<HitDto> request = new HttpEntity<>(hitDto);
-        return restTemplate.postForObject(statServiceUri + "/hit", request, HitDto.class);
+        String uri = "http://" + statServiceUri + "/hit";
+        return restTemplate.postForObject(uri, request, StatisticDto.class);
     }
 
-    public List<StatisticDto> getStatisticByParams(Map<String, String> params) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-        params.forEach(map::add);
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
-        ListStatisticDto wrapperList = restTemplate.getForObject(statServiceUri + "/stats",
-                ListStatisticDto.class, request);
-        return wrapperList.getStatistic();
+    public List<StatisticDto> getStatisticByParams(Map<String, String> requestParams) {
+        String serverUri = "http://" + statServiceUri + "/stats?";
+        String encodedURL = requestParams.keySet().stream()
+                .map(key -> key + "=" + encodeValue(requestParams.get(key)))
+                .collect(joining("&", serverUri, ""));
+        return restTemplate.getForObject(encodedURL, ListStatisticDto.class).getStatistic();
+    }
+
+    private String encodeValue(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
 }

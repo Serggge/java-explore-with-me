@@ -8,7 +8,6 @@ import ru.practicum.explorewithme.model.CountByApp;
 import ru.practicum.explorewithme.model.Statistic;
 import ru.practicum.explorewithme.service.StatMapper;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -21,8 +20,7 @@ public class StatMapperImpl implements StatMapper {
         Statistic statistic = new Statistic();
         statistic.setApp(app);
         statistic.setIp(hitDto.getIp());
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime timestamp = LocalDateTime.parse(hitDto.getTimestamp(), formatter);
+        LocalDateTime timestamp = hitDto.getTimestamp();
         statistic.setTimestamp(timestamp);
         return statistic;
     }

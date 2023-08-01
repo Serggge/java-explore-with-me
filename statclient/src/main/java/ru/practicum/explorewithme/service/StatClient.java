@@ -7,7 +7,7 @@ import java.util.Map;
 
 public interface StatClient {
 
-    HitDto sendHit(HitDto hitDto);
+    StatisticDto sendHit(HitDto hitDto);
 
     List<StatisticDto> getStatisticByParams(Map<String, String> params);
 

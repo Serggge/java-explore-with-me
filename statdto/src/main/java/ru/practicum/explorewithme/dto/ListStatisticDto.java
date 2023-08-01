@@ -15,4 +15,7 @@ public class ListStatisticDto {
         this.statistic = new ArrayList<>();
     }
 
+    public ListStatisticDto(List<StatisticDto> statistic) {
+        this.statistic = statistic;
+    }
 }
