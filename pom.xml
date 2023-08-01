@@ -6,16 +6,23 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.7.5</version>
+		<version>2.7.14</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 
-	<name>Explore With Me</name>
+	<name>ExploreWithMe</name>
 
-	<groupId>ru.practicum</groupId>
+    <groupId>ru.practicum</groupId>
 	<artifactId>explore-with-me</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
+
+	<modules>
+		<module>stats</module>
+		<module>statclient</module>
+		<module>statdto</module>
+		<module>emw</module>
+	</modules>
 
 	<properties>
 		<java.version>11</java.version>
