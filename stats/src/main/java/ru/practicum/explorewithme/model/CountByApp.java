@@ -13,6 +13,6 @@ public class CountByApp {
 
     private String app;
     private String uri;
-    private Long count;
+    private Long hits;
 
 }

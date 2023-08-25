@@ -30,7 +30,7 @@ public class StatMapperImpl implements StatMapper {
         StatisticDto dto = new StatisticDto();
         dto.setUri(stats.getUri());
         dto.setApp(stats.getApp());
-        dto.setHits(stats.getCount());
+        dto.setHits(stats.getHits());
         return dto;
     }
 
