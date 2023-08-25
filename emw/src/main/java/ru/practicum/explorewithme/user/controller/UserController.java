@@ -48,6 +48,6 @@ public class UserController {
                                      @RequestParam(defaultValue = "10") @Min(1) Integer size) {
         log.debug("Request for getting users ids={}, from={}, size={}", ids, from, size);
         return userService.getAll(ids, from, size);
-    };
+    }
 
 }
