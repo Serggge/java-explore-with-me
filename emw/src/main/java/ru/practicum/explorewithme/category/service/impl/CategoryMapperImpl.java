@@ -4,12 +4,12 @@ import org.springframework.stereotype.Component;
 import ru.practicum.explorewithme.category.dto.CategoryDto;
 import ru.practicum.explorewithme.category.dto.NewCategoryDto;
 import ru.practicum.explorewithme.category.model.Category;
-import ru.practicum.explorewithme.category.service.CatergoryMapper;
+import ru.practicum.explorewithme.category.service.CategoryMapper;
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class CategoryMapperImpl implements CatergoryMapper {
+public class CategoryMapperImpl implements CategoryMapper {
 
     @Override
     public Category mapToCategory(NewCategoryDto dto) {

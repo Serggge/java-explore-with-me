@@ -12,7 +12,7 @@ import ru.practicum.explorewithme.category.dto.NewCategoryDto;
 import ru.practicum.explorewithme.category.model.Category;
 import ru.practicum.explorewithme.category.repository.CategoryRepository;
 import ru.practicum.explorewithme.category.service.CategoryService;
-import ru.practicum.explorewithme.category.service.CatergoryMapper;
+import ru.practicum.explorewithme.category.service.CategoryMapper;
 import ru.practicum.explorewithme.event.repository.EventRepository;
 import ru.practicum.explorewithme.exception.illegal.CategoryNotEmptyException;
 import ru.practicum.explorewithme.exception.notFound.CategoryNotFoundException;
@@ -25,12 +25,12 @@ import java.util.Optional;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
-    private final CatergoryMapper categoryMapper;
+    private final CategoryMapper categoryMapper;
     private final EventRepository eventRepository;
 
     @Autowired
     public CategoryServiceImpl(CategoryRepository categoryRepository,
-                               CatergoryMapper categoryMapper,
+                               CategoryMapper categoryMapper,
                                EventRepository eventRepository) {
         this.categoryRepository = categoryRepository;
         this.categoryMapper = categoryMapper;

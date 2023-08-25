@@ -3,7 +3,7 @@ package ru.practicum.explorewithme.event.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.explorewithme.category.model.Category;
-import ru.practicum.explorewithme.category.service.CatergoryMapper;
+import ru.practicum.explorewithme.category.service.CategoryMapper;
 import ru.practicum.explorewithme.event.dto.EventFullDto;
 import ru.practicum.explorewithme.event.dto.EventShortDto;
 import ru.practicum.explorewithme.event.dto.LocationDto;
@@ -23,12 +23,12 @@ import java.util.Map;
 @Service
 public class EventMapperImpl implements EventMapper {
 
-    private final CatergoryMapper catergoryMapper;
+    private final CategoryMapper categoryMapper;
     private final UserMapper userMapper;
 
     @Autowired
-    public EventMapperImpl(CatergoryMapper catergoryMapper, UserMapper userMapper) {
-        this.catergoryMapper = catergoryMapper;
+    public EventMapperImpl(CategoryMapper categoryMapper, UserMapper userMapper) {
+        this.categoryMapper = categoryMapper;
         this.userMapper = userMapper;
     }
 
@@ -110,7 +110,7 @@ public class EventMapperImpl implements EventMapper {
     public EventFullDto mapToFullDto(Event event) {
         EventFullDto dto = new EventFullDto();
         dto.setAnnotation(event.getAnnotation());
-        dto.setCategory(catergoryMapper.mapToDto(event.getCategory()));
+        dto.setCategory(categoryMapper.mapToDto(event.getCategory()));
         dto.setCreatedOn(event.getCreated());
         dto.setDescription(event.getDescription());
         dto.setEventDate(event.getEventDate());
@@ -142,7 +142,7 @@ public class EventMapperImpl implements EventMapper {
         EventShortDto dto = new EventShortDto();
         dto.setId(event.getId());
         dto.setAnnotation(event.getAnnotation());
-        dto.setCategory(catergoryMapper.mapToDto(event.getCategory()));
+        dto.setCategory(categoryMapper.mapToDto(event.getCategory()));
         dto.setConfirmedRequests(event.getConfirmedRequests());
         dto.setEventDate(event.getEventDate());
         dto.setInitiator(userMapper.mapToShortDto(event.getInitiator()));
