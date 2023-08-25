@@ -9,7 +9,7 @@ import ru.practicum.explorewithme.user.model.User;
 
 @Generated(value = "org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor")
 @StaticMetamodel(Event.class)
-public abstract class Event_ {
+public abstract class EventMetamodel {
 
 	public static volatile SingularAttribute<Event, String> annotation;
 	public static volatile SingularAttribute<Event, LocalDateTime> created;

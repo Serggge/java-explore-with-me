@@ -8,7 +8,7 @@ import ru.practicum.explorewithme.event.model.Event;
 
 @Generated(value = "org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor")
 @StaticMetamodel(Compilation.class)
-public abstract class Compilation_ {
+public abstract class CompilationMetamodel {
 
 	public static volatile SingularAttribute<Compilation, Boolean> pinned;
 	public static volatile SingularAttribute<Compilation, Long> id;

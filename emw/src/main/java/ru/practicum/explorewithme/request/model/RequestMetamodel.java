@@ -9,7 +9,7 @@ import ru.practicum.explorewithme.user.model.User;
 
 @Generated(value = "org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor")
 @StaticMetamodel(Request.class)
-public abstract class Request_ {
+public abstract class RequestMetamodel {
 
 	public static volatile SingularAttribute<Request, User> requester;
 	public static volatile SingularAttribute<Request, LocalDateTime> created;
