@@ -1,12 +1,11 @@
 package ru.practicum.explorewithme.event.service.impl;
 
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import ru.practicum.explorewithme.category.model.CategoryMetamodel;
+import ru.practicum.explorewithme.category.model.Category_;
 import ru.practicum.explorewithme.category.service.CategoryService;
 import ru.practicum.explorewithme.dto.StatisticDto;
 import ru.practicum.explorewithme.event.dto.Categorized;
@@ -17,7 +16,7 @@ import ru.practicum.explorewithme.event.dto.Sorting;
 import ru.practicum.explorewithme.event.dto.UpdateEventRequest;
 import ru.practicum.explorewithme.event.model.Event;
 import ru.practicum.explorewithme.event.model.EventState;
-import ru.practicum.explorewithme.event.model.EventMetamodel;
+import ru.practicum.explorewithme.event.model.Event_;
 import ru.practicum.explorewithme.event.model.StateAction;
 import ru.practicum.explorewithme.event.repository.EventRepository;
 import ru.practicum.explorewithme.event.service.EventMapper;
@@ -28,7 +27,7 @@ import ru.practicum.explorewithme.exception.illegal.TimeLimitException;
 import ru.practicum.explorewithme.exception.notFound.EventNotFoundException;
 import ru.practicum.explorewithme.request.repository.EventRequestRepository;
 import ru.practicum.explorewithme.statistic.StatProxyService;
-import ru.practicum.explorewithme.user.model.UserMetamodel;
+import ru.practicum.explorewithme.user.model.User_;
 import ru.practicum.explorewithme.user.service.UserService;
 import static ru.practicum.explorewithme.util.Constants.DATE_FORMAT;
 import javax.persistence.EntityManager;
@@ -52,7 +51,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor(onConstructor__ = @Autowired)
 @Setter
 @Slf4j
 public class EventServiceImpl implements EventService {
@@ -65,6 +63,23 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final EventRequestRepository eventRequestRepository;
     private final EventMapper eventMapper;
+
+    @Autowired
+    public EventServiceImpl(EntityManager em,
+                            CategoryService categoryService,
+                            UserService userService,
+                            StatProxyService statService,
+                            EventRepository eventRepository,
+                            EventRequestRepository eventRequestRepository,
+                            EventMapper eventMapper) {
+        this.em = em;
+        this.categoryService = categoryService;
+        this.userService = userService;
+        this.statService = statService;
+        this.eventRepository = eventRepository;
+        this.eventRequestRepository = eventRequestRepository;
+        this.eventMapper = eventMapper;
+    }
 
     @Override
     public EventFullDto getEventById(long eventId, HttpServletRequest servletRequest) {
@@ -156,23 +171,23 @@ public class EventServiceImpl implements EventService {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Event> cq = cb.createQuery(Event.class);
         Root<Event> root = cq.from(Event.class);
-        root.fetch(EventMetamodel.category, JoinType.INNER);
-        root.fetch(EventMetamodel.initiator, JoinType.INNER);
+        root.fetch(Event_.category, JoinType.INNER);
+        root.fetch(Event_.initiator, JoinType.INNER);
 
         cq.select(root);
 
         List<Predicate> conditions = new ArrayList<>();
         if (userIds != null) {
-            conditions.add(root.get(EventMetamodel.initiator).get(UserMetamodel.id).in(userIds));
+            conditions.add(root.get(Event_.initiator).get(User_.id).in(userIds));
         }
         if (states != null) {
-            conditions.add(root.get(EventMetamodel.state).in(states));
+            conditions.add(root.get(Event_.state).in(states));
         }
         if (categories != null) {
-            conditions.add(root.get(EventMetamodel.category).get(CategoryMetamodel.id).in(categories));
+            conditions.add(root.get(Event_.category).get(Category_.id).in(categories));
         }
         if (rangeStart != null && rangeEnd != null) {
-            conditions.add(cb.between(root.get(EventMetamodel.eventDate), LocalDateTime.parse(rangeStart, DATE_FORMAT),
+            conditions.add(cb.between(root.get(Event_.eventDate), LocalDateTime.parse(rangeStart, DATE_FORMAT),
                     LocalDateTime.parse(rangeEnd, DATE_FORMAT)));
         }
 
@@ -195,35 +210,35 @@ public class EventServiceImpl implements EventService {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Event> cq = cb.createQuery(Event.class);
         Root<Event> root = cq.from(Event.class);
-        root.fetch(EventMetamodel.category, JoinType.INNER);
-        root.fetch(EventMetamodel.initiator, JoinType.INNER);
+        root.fetch(Event_.category, JoinType.INNER);
+        root.fetch(Event_.initiator, JoinType.INNER);
 
         cq.select(root);
 
         List<Predicate> conditions = new ArrayList<>();
-        conditions.add(cb.isNotNull(root.get(EventMetamodel.published)));
+        conditions.add(cb.isNotNull(root.get(Event_.published)));
         if (text != null) {
             String templateForSearch = "%" + text.toUpperCase() + "%";
-            Predicate textInAnnotation = cb.like(cb.upper(root.get(EventMetamodel.annotation)), templateForSearch);
-            Predicate textInDescription = cb.like(cb.upper(root.get(EventMetamodel.description)), templateForSearch);
+            Predicate textInAnnotation = cb.like(cb.upper(root.get(Event_.annotation)), templateForSearch);
+            Predicate textInDescription = cb.like(cb.upper(root.get(Event_.description)), templateForSearch);
             conditions.add(cb.or(textInAnnotation, textInDescription));
         }
         if (categories != null) {
-            conditions.add(root.get(EventMetamodel.category).get(CategoryMetamodel.id).in(categories));
+            conditions.add(root.get(Event_.category).get(Category_.id).in(categories));
         }
         if (paid != null) {
-            conditions.add(cb.equal(root.get(EventMetamodel.paid), paid));
+            conditions.add(cb.equal(root.get(Event_.paid), paid));
         }
 
         if (rangeStart == null || rangeEnd == null) {
-            conditions.add(cb.greaterThan(root.get(EventMetamodel.eventDate), LocalDateTime.now()));
+            conditions.add(cb.greaterThan(root.get(Event_.eventDate), LocalDateTime.now()));
         } else {
-            conditions.add(cb.between(root.get(EventMetamodel.eventDate), LocalDateTime.parse(rangeStart, DATE_FORMAT),
+            conditions.add(cb.between(root.get(Event_.eventDate), LocalDateTime.parse(rangeStart, DATE_FORMAT),
                     LocalDateTime.parse(rangeEnd, DATE_FORMAT)));
         }
 
         if (sort != null && sort.equals(Sorting.EVENT_DATE)) {
-            cq = cq.where(conditions.toArray(new Predicate[0])).orderBy(cb.asc(root.get(EventMetamodel.eventDate)));
+            cq = cq.where(conditions.toArray(new Predicate[0])).orderBy(cb.asc(root.get(Event_.eventDate)));
         } else {
             cq = cq.where(conditions.toArray(new Predicate[0]));
         }

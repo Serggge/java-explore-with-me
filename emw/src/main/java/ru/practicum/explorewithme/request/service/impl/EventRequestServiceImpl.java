@@ -1,6 +1,5 @@
 package ru.practicum.explorewithme.request.service.impl;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,7 +27,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor(onConstructor__ = @Autowired)
 @Slf4j
 public class EventRequestServiceImpl implements EventRequestService {
 
@@ -36,6 +34,17 @@ public class EventRequestServiceImpl implements EventRequestService {
     private final EventService eventService;
     private final EventRequestRepository eventRequestRepository;
     private final EventRequestMapper eventRequestMapper;
+
+    @Autowired
+    public EventRequestServiceImpl(UserService userService,
+                                   EventService eventService,
+                                   EventRequestRepository eventRequestRepository,
+                                   EventRequestMapper eventRequestMapper) {
+        this.userService = userService;
+        this.eventService = eventService;
+        this.eventRequestRepository = eventRequestRepository;
+        this.eventRequestMapper = eventRequestMapper;
+    }
 
     @Override
     public ParticipationRequestDto create(long requesterId, long eventId) {

@@ -1,6 +1,5 @@
 package ru.practicum.explorewithme.compilation.controller;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,12 +22,16 @@ import javax.validation.constraints.Min;
 import java.util.List;
 
 @RestController
-@RequiredArgsConstructor(onConstructor__ = @Autowired)
 @Slf4j
 @Validated
 public class CompilationController {
 
     private final CompilationService compilationService;
+
+    @Autowired
+    public CompilationController(CompilationService compilationService) {
+        this.compilationService = compilationService;
+    }
 
     @GetMapping("/compilations")
     public List<CompilationDto> returnCompilation(@RequestParam(defaultValue = "false") Boolean pinned,

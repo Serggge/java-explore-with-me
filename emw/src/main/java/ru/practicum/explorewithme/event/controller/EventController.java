@@ -1,6 +1,5 @@
 package ru.practicum.explorewithme.event.controller;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +26,16 @@ import javax.validation.constraints.Min;
 import java.util.List;
 
 @RestController
-@RequiredArgsConstructor(onConstructor__ = @Autowired)
 @Slf4j
 @Validated
 public class EventController {
 
     private final EventService eventService;
+
+    @Autowired
+    public EventController(EventService eventService) {
+        this.eventService = eventService;
+    }
 
     @GetMapping("/events/{id}")
     public EventFullDto returnEventById(@PathVariable Long id,

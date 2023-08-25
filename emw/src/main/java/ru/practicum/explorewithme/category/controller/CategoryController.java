@@ -1,6 +1,5 @@
 package ru.practicum.explorewithme.category.controller;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,12 +20,16 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequiredArgsConstructor(onConstructor__ = @Autowired)
 @Slf4j
 @Validated
 public class CategoryController {
 
     private final CategoryService categoryService;
+
+    @Autowired
+    public CategoryController(CategoryService categoryService) {
+        this.categoryService = categoryService;
+    }
 
     @PostMapping("/admin/categories")
     @ResponseStatus(HttpStatus.CREATED)

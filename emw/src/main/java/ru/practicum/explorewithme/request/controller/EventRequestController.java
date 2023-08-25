@@ -1,6 +1,5 @@
 package ru.practicum.explorewithme.request.controller;
 
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +20,16 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequiredArgsConstructor(onConstructor__ = @Autowired)
 @Setter
 @Slf4j
 public class EventRequestController {
 
     private final EventRequestService eventRequestService;
+
+    @Autowired
+    public EventRequestController(EventRequestService eventRequestService) {
+        this.eventRequestService = eventRequestService;
+    }
 
     @PostMapping("/users/{userId}/requests")
     @ResponseStatus(HttpStatus.CREATED)

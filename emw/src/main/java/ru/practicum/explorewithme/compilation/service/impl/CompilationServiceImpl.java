@@ -1,6 +1,5 @@
 package ru.practicum.explorewithme.compilation.service.impl;
 
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,6 @@ import java.util.HashSet;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor(onConstructor__ = @Autowired)
 @Slf4j
 @Setter
 public class CompilationServiceImpl implements CompilationService {
@@ -30,6 +28,15 @@ public class CompilationServiceImpl implements CompilationService {
     private final CompilationRepository compilationRepository;
     private final CompilationMapper compilationMapper;
     private final EventService eventService;
+
+    @Autowired
+    public CompilationServiceImpl(CompilationRepository compilationRepository,
+                                  CompilationMapper compilationMapper,
+                                  EventService eventService) {
+        this.compilationRepository = compilationRepository;
+        this.compilationMapper = compilationMapper;
+        this.eventService = eventService;
+    }
 
     @Override
     public List<CompilationDto> getAll(Boolean pinned, int from, int size) {

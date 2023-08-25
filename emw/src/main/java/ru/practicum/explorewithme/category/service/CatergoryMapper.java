@@ -6,7 +6,6 @@ import ru.practicum.explorewithme.category.dto.NewCategoryDto;
 import ru.practicum.explorewithme.category.model.Category;
 import java.util.List;
 
-@Component
 public interface CatergoryMapper {
 
     Category mapToCategory(NewCategoryDto dto);
