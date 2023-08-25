@@ -40,8 +40,8 @@ public class StatsController {
     }
 
     @GetMapping("/stats")
-    public ListStatisticDto view(@RequestParam(required = false) String start,
-                                 @RequestParam(required = false) String end,
+    public ListStatisticDto view(@RequestParam String start,
+                                 @RequestParam String end,
                                  @RequestParam(required = false) String uris,
                                  @RequestParam(defaultValue = "false") Boolean unique) {
         log.debug("Getting statistic: start: {} end: {} uris: {} unique: {}", start, end, uris, unique);

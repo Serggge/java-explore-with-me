@@ -40,6 +40,9 @@ public class StatMapperImpl implements StatMapper {
         for (CountByApp stat : stats) {
             result.add(mapToDto(stat));
         }
+        if (result.isEmpty()) {
+            result.add(new StatisticDto());
+        }
         return result;
     }
 }
