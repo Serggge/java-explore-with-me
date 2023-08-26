@@ -22,6 +22,7 @@ import ru.practicum.explorewithme.request.service.EventRequestMapper;
 import ru.practicum.explorewithme.request.service.EventRequestService;
 import ru.practicum.explorewithme.user.model.User;
 import ru.practicum.explorewithme.user.service.UserService;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -120,7 +121,8 @@ public class EventRequestServiceImpl implements EventRequestService {
         Event event = eventService.getEventEntityById(eventId);
         List<Request> requests = eventRequestRepository.findByIds(dto.getRequestIds());
         requests.stream()
-                .filter(request -> request.getStatus() == Status.CONFIRMED)
+                .filter(request -> request.getStatus() == Status.CONFIRMED
+                        || request.getStatus() == Status.CANCELED)
                 .findFirst()
                 .ifPresent(request -> {
                     throw new RequestStateException("Cant change confirmed request");

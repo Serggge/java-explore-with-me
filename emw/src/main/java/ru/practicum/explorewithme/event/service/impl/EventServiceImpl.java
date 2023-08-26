@@ -327,6 +327,8 @@ public class EventServiceImpl implements EventService {
                 LocalDateTime.now().minusYears(1), LocalDateTime.now(), uri, false);
         if (statistic.size() == 1) {
             event.setViews(statistic.get(0).getHits());
+        } else {
+            event.setViews(0);
         }
     }
 
@@ -343,6 +345,8 @@ public class EventServiceImpl implements EventService {
             String appUri = "/events/" + event.getId();
             if (statMap.containsKey(appUri)) {
                 event.setViews(statMap.get(appUri).getHits());
+            } else {
+                event.setViews(0);
             }
         }
     }

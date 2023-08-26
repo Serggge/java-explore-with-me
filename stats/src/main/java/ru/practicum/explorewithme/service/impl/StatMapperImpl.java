@@ -30,7 +30,11 @@ public class StatMapperImpl implements StatMapper {
         StatisticDto dto = new StatisticDto();
         dto.setUri(stats.getUri());
         dto.setApp(stats.getApp());
-        dto.setHits(stats.getHits());
+        if (stats.getHits() == null) {
+            dto.setHits(0L);
+        } else {
+            dto.setHits(stats.getHits());
+        }
         return dto;
     }
 
@@ -39,9 +43,6 @@ public class StatMapperImpl implements StatMapper {
         List<StatisticDto> result = new ArrayList<>();
         for (CountByApp stat : stats) {
             result.add(mapToDto(stat));
-        }
-        if (result.isEmpty()) {
-            result.add(new StatisticDto());
         }
         return result;
     }

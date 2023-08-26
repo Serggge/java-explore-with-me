@@ -117,7 +117,7 @@ public class EventMapperImpl implements EventMapper {
         dto.setId(event.getId());
         dto.setInitiator(userMapper.mapToShortDto(event.getInitiator()));
         dto.setLocation(new LocationDto(event.getLat(), event.getLon()));
-        dto.setPaid(event.getPaid());
+        dto.setPaid(event.isPaid());
         dto.setParticipantLimit(event.getParticipantLimit());
         dto.setPublishedOn(event.getPublished());
         dto.setRequestModeration(event.getRequestModeration());
@@ -146,7 +146,7 @@ public class EventMapperImpl implements EventMapper {
         dto.setConfirmedRequests(event.getConfirmedRequests());
         dto.setEventDate(event.getEventDate());
         dto.setInitiator(userMapper.mapToShortDto(event.getInitiator()));
-        dto.setPaid(event.getPaid());
+        dto.setPaid(event.isPaid());
         dto.setTitle(event.getTitle());
         dto.setViews(event.getViews());
         return dto;

@@ -47,17 +47,14 @@ public class Event {
     private Double lon;
     @Enumerated(EnumType.STRING)
     private EventState state;
-    private Boolean paid = false;
+    private boolean paid;
     @Column(name = "request_moderation")
     private Boolean requestModeration;
     @Column(name = "participant_limit")
-    private Long participantLimit;
+    private long participantLimit;
     @Transient
-    private Long confirmedRequests;
+    private long confirmedRequests;
     @Transient
-    private Long views = 0L;
+    private long views;
 
-    public boolean isPaid() {
-        return paid;
-    }
 }

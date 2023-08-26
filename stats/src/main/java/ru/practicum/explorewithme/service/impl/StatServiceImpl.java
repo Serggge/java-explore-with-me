@@ -15,6 +15,7 @@ import ru.practicum.explorewithme.service.StatMapper;
 import ru.practicum.explorewithme.service.StatService;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -59,6 +60,9 @@ public class StatServiceImpl implements StatService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime startTime = LocalDateTime.parse(start, formatter);
         LocalDateTime endTime = LocalDateTime.parse(end, formatter);
+        if (endTime.isBefore(startTime)) {
+            throw new DateTimeException("Start time can't be after end time");
+        }
         List<CountByApp> stats;
         if (unique) {
             stats = statRepository.findUniqueStatistic(startTime, endTime, urisArray);
