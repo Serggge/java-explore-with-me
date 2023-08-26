@@ -125,6 +125,8 @@ public class EventMapperImpl implements EventMapper {
         dto.setTitle(event.getTitle());
         dto.setConfirmedRequests(event.getConfirmedRequests());
         dto.setViews(event.getViews());
+        dto.setLikes(event.getLikes());
+        dto.setDislikes(event.getDislikes());
         return dto;
     }
 

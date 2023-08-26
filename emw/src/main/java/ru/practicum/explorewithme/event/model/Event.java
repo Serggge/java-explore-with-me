@@ -56,5 +56,8 @@ public class Event {
     private long confirmedRequests;
     @Transient
     private long views;
-
+    @Transient
+    private long likes;
+    @Transient
+    private long dislikes;
 }

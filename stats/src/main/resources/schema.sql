@@ -11,5 +11,6 @@ CREATE TABLE IF NOT EXISTS stats
     app_id BIGINT NOT NULL,
     ip varchar(255) NOT NULL,
     timestamp TIMESTAMP NOT NULL,
+
     CONSTRAINT fk_stats_apps FOREIGN KEY (app_id) REFERENCES apps(id) ON DELETE CASCADE
 );
