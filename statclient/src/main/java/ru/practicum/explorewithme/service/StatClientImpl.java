@@ -1,10 +1,11 @@
 package ru.practicum.explorewithme.service;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestTemplate;
-import ru.practicum.explorewithme.dto.HitDto;
-import ru.practicum.explorewithme.dto.ListStatisticDto;
-import ru.practicum.explorewithme.dto.StatisticDto;
+import ru.practicum.explorewithme.dto.EndpointHit;
+import ru.practicum.explorewithme.dto.ViewStats;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -21,18 +22,19 @@ public class StatClientImpl implements StatClient {
         this.restTemplate = new RestTemplate();
     }
 
-    public StatisticDto sendHit(HitDto hitDto) {
-        HttpEntity<HitDto> request = new HttpEntity<>(hitDto);
+    public ViewStats sendHit(EndpointHit hitDto) {
+        HttpEntity<EndpointHit> request = new HttpEntity<>(hitDto);
         String uri = "http://" + statServiceUri + "/hit";
-        return restTemplate.postForObject(uri, request, StatisticDto.class);
+        return restTemplate.postForObject(uri, request, ViewStats.class);
     }
 
-    public List<StatisticDto> getStatisticByParams(Map<String, String> requestParams) {
+    public List<ViewStats> getStatisticByParams(Map<String, String> requestParams) {
         String serverUri = "http://" + statServiceUri + "/stats?";
         String encodedURL = requestParams.keySet().stream()
                 .map(key -> key + "=" + encodeValue(requestParams.get(key)))
                 .collect(joining("&", serverUri, ""));
-        return restTemplate.getForObject(encodedURL, ListStatisticDto.class).getStatistic();
+        return restTemplate.exchange(encodedURL, HttpMethod.GET, null,
+                new ParameterizedTypeReference<List<ViewStats>>(){}).getBody();
     }
 
     private String encodeValue(String value) {

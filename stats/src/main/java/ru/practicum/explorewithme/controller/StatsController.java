@@ -12,9 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.explorewithme.dto.HitDto;
-import ru.practicum.explorewithme.dto.ListStatisticDto;
-import ru.practicum.explorewithme.dto.StatisticDto;
+import ru.practicum.explorewithme.dto.EndpointHit;
+import ru.practicum.explorewithme.dto.ViewStats;
 import ru.practicum.explorewithme.service.StatService;
 import java.util.List;
 
@@ -34,19 +33,18 @@ public class StatsController {
 
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
-    public StatisticDto hit(@RequestBody HitDto hitDto) {
+    public ViewStats hit(@RequestBody EndpointHit hitDto) {
         log.debug("New hit: {}", hitDto);
         return statService.addHit(hitDto);
     }
 
     @GetMapping("/stats")
-    public ListStatisticDto view(@RequestParam String start,
-                                 @RequestParam String end,
-                                 @RequestParam(required = false) String uris,
-                                 @RequestParam(defaultValue = "false") Boolean unique) {
+    public List<ViewStats> view(@RequestParam String start,
+                                @RequestParam String end,
+                                @RequestParam(required = false) String uris,
+                                @RequestParam(defaultValue = "false") Boolean unique) {
         log.debug("Getting statistic: start: {} end: {} uris: {} unique: {}", start, end, uris, unique);
-        List<StatisticDto> statisticList = statService.getStatistic(start, end, uris, unique);
-        return new ListStatisticDto(statisticList);
+        return statService.getStatistic(start, end, uris, unique);
     }
 
 }

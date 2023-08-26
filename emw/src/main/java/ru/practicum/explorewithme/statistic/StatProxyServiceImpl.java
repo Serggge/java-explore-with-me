@@ -2,8 +2,8 @@ package ru.practicum.explorewithme.statistic;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import ru.practicum.explorewithme.dto.HitDto;
-import ru.practicum.explorewithme.dto.StatisticDto;
+import ru.practicum.explorewithme.dto.EndpointHit;
+import ru.practicum.explorewithme.dto.ViewStats;
 import ru.practicum.explorewithme.exception.clientServer.ServerResponseException;
 import ru.practicum.explorewithme.service.StatClient;
 import ru.practicum.explorewithme.service.StatsClientFactory;
@@ -28,8 +28,8 @@ public class StatProxyServiceImpl implements StatProxyService {
     }
 
     @Override
-    public StatisticDto addHit(HttpServletRequest request) {
-        HitDto hitDto = HitDto
+    public ViewStats addHit(HttpServletRequest request) {
+        EndpointHit hitDto = EndpointHit
                 .builder()
                 .app(appName)
                 .uri(request.getRequestURI())
@@ -44,7 +44,7 @@ public class StatProxyServiceImpl implements StatProxyService {
     }
 
     @Override
-    public List<StatisticDto> getStatistic(LocalDateTime start, LocalDateTime end, String[] uris, Boolean unique) {
+    public List<ViewStats> getStatistic(LocalDateTime start, LocalDateTime end, String[] uris, Boolean unique) {
         Map<String, String> params = new HashMap<>();
         params.put("start", start.format(DATE_FORMAT));
         params.put("end", end.format(DATE_FORMAT));

@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @ToString
 @Builder
-public class HitDto {
+public class EndpointHit {
 
     private Long id;
     private String app;

@@ -1,14 +1,14 @@
 package ru.practicum.explorewithme.service;
 
-import ru.practicum.explorewithme.dto.HitDto;
-import ru.practicum.explorewithme.dto.StatisticDto;
+import ru.practicum.explorewithme.dto.EndpointHit;
+import ru.practicum.explorewithme.dto.ViewStats;
 import java.util.List;
 import java.util.Map;
 
 public interface StatClient {
 
-    StatisticDto sendHit(HitDto hitDto);
+    ViewStats sendHit(EndpointHit hitDto);
 
-    List<StatisticDto> getStatisticByParams(Map<String, String> params);
+    List<ViewStats> getStatisticByParams(Map<String, String> params);
 
 }

@@ -4,10 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.practicum.explorewithme.dto.HitDto;
-import ru.practicum.explorewithme.dto.StatisticDto;
+import ru.practicum.explorewithme.dto.EndpointHit;
+import ru.practicum.explorewithme.dto.ViewStats;
 import ru.practicum.explorewithme.model.Application;
-import ru.practicum.explorewithme.model.CountByApp;
 import ru.practicum.explorewithme.model.Statistic;
 import ru.practicum.explorewithme.repository.AppRepository;
 import ru.practicum.explorewithme.repository.StatRepository;
@@ -32,7 +31,7 @@ public class StatServiceImpl implements StatService {
     private final StatMapper statMapper;
 
     @Override
-    public StatisticDto addHit(HitDto hitDto) {
+    public ViewStats addHit(EndpointHit hitDto) {
         String[] uriParts = hitDto.getUri().split("/");
         String appUri = "/" + uriParts[uriParts.length - 2] + "/" + uriParts[uriParts.length - 1];
         Optional<Application> optionalApp = appRepository.findByUriAndName(appUri, hitDto.getApp());
@@ -48,12 +47,12 @@ public class StatServiceImpl implements StatService {
         Statistic statistic = statMapper.mapToStatistic(hitDto, app);
         Statistic saved = statRepository.save(statistic);
         log.info("Новое событие: {}", saved);
-        CountByApp uniqueStatistic = statRepository.findUniqueStatistic(app.getUri(), app.getName());
-        return statMapper.mapToDto(uniqueStatistic);
+        return statRepository.findUniqueStatistic(app.getUri(), app.getName())
+                .orElse(new ViewStats(app.getUri(), app.getName(), 0L));
     }
 
     @Override
-    public List<StatisticDto> getStatistic(String start, String end, String uris, Boolean unique) {
+    public List<ViewStats> getStatistic(String start, String end, String uris, Boolean unique) {
         start = decode(start);
         end = decode(end);
         uris = decode(uris);
@@ -74,14 +73,13 @@ public class StatServiceImpl implements StatService {
         if (endTime.isBefore(startTime)) {
             throw new DateTimeException("Start time can't be after end time");
         }
-
-        List<CountByApp> stats;
+        List<ViewStats> stats;
         if (unique) {
             stats = statRepository.findUniqueStatistic(startTime, endTime, urisArray);
         } else {
             stats = statRepository.findStatistic(startTime, endTime, urisArray);
         }
-        return statMapper.mapToDto(stats);
+        return stats;
     }
 
     private String decode(String value) {

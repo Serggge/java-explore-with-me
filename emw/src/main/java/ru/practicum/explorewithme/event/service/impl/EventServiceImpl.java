@@ -7,7 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.explorewithme.category.model.Category_;
 import ru.practicum.explorewithme.category.service.CategoryService;
-import ru.practicum.explorewithme.dto.StatisticDto;
+import ru.practicum.explorewithme.dto.ViewStats;
 import ru.practicum.explorewithme.event.dto.Categorized;
 import ru.practicum.explorewithme.event.dto.EventFullDto;
 import ru.practicum.explorewithme.event.dto.EventShortDto;
@@ -85,7 +85,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto getEventById(long eventId, HttpServletRequest servletRequest) {
         Event foundedEvent = eventRepository.findByIdAndPublishedNotNull(eventId).orElseThrow(() ->
                 new EventNotFoundException(String.format("Event with id=%d was not found", eventId)));
-        StatisticDto statDto = statService.addHit(servletRequest);
+        ViewStats statDto = statService.addHit(servletRequest);
         foundedEvent.setViews(statDto.getHits());
         fillRequestInfo(foundedEvent);
         return eventMapper.mapToFullDto(foundedEvent);
@@ -117,7 +117,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto getEventAddedByUser(long userId, long eventId, HttpServletRequest servletRequest) {
         log.debug("Get Event by ID={}, userID={}", eventId, userId);
         Event userEvent = getUserEvent(userId, eventId);
-        StatisticDto statDto = statService.addHit(servletRequest);
+        ViewStats statDto = statService.addHit(servletRequest);
         userEvent.setViews(statDto.getHits());
         fillRequestInfo(userEvent);
         return eventMapper.mapToFullDto(userEvent);
@@ -323,7 +323,7 @@ public class EventServiceImpl implements EventService {
 
     private void fillStatistic(Event event) {
         String[] uri = new String[]{"/events/" + event.getId()};
-        List<StatisticDto> statistic = statService.getStatistic(
+        List<ViewStats> statistic = statService.getStatistic(
                 LocalDateTime.now().minusYears(1), LocalDateTime.now(), uri, false);
         if (statistic.size() == 1) {
             event.setViews(statistic.get(0).getHits());
@@ -337,10 +337,10 @@ public class EventServiceImpl implements EventService {
                 .stream()
                 .map(event -> "/events/" + event.getId())
                 .toArray(String[]::new);
-        Map<String, StatisticDto> statMap = statService.getStatistic(
+        Map<String, ViewStats> statMap = statService.getStatistic(
                         LocalDateTime.now().minusYears(1), LocalDateTime.now(), uris, true)
                 .stream()
-                .collect(Collectors.toMap(StatisticDto::getUri, stat -> stat));
+                .collect(Collectors.toMap(ViewStats::getUri, stat -> stat));
         for (Event event : events) {
             String appUri = "/events/" + event.getId();
             if (statMap.containsKey(appUri)) {
