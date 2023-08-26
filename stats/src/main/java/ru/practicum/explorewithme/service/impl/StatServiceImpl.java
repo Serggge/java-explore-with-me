@@ -13,6 +13,7 @@ import ru.practicum.explorewithme.repository.AppRepository;
 import ru.practicum.explorewithme.repository.StatRepository;
 import ru.practicum.explorewithme.service.StatMapper;
 import ru.practicum.explorewithme.service.StatService;
+
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.DateTimeException;
@@ -61,6 +62,8 @@ public class StatServiceImpl implements StatService {
             urisArray = uris.substring(1, uris.length() - 1).split(",");
         } else if (uris.matches("^[.+]$")) {
             urisArray = new String[]{uris.substring(1, uris.length() - 1)};
+        } else if (uris.contains(",")) {
+            urisArray = uris.split(",");
         } else {
             urisArray = new String[]{uris};
         }
@@ -71,6 +74,7 @@ public class StatServiceImpl implements StatService {
         if (endTime.isBefore(startTime)) {
             throw new DateTimeException("Start time can't be after end time");
         }
+
         List<CountByApp> stats;
         if (unique) {
             stats = statRepository.findUniqueStatistic(startTime, endTime, urisArray);

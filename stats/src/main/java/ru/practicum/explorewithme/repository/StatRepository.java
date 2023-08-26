@@ -23,7 +23,7 @@ public interface StatRepository extends JpaRepository<Statistic, Long> {
             "where stat.timestamp > :start " +
             "and stat.timestamp < :end " +
             "group by app.name, app.uri " +
-            "order by count(stat.ip) desc")
+            "order by count(stat.id) desc")
     List<CountByApp> findStatistic(LocalDateTime start, LocalDateTime end);
 
     @Query("select new ru.practicum.explorewithme.model.CountByApp(app.name, app.uri, count(stat.id)) " +
@@ -33,7 +33,7 @@ public interface StatRepository extends JpaRepository<Statistic, Long> {
             "and stat.timestamp < :end " +
             "and app.uri in :uris " +
             "group by app.name, app.uri " +
-            "order by count(stat.ip) desc")
+            "order by count(stat.id) desc")
     List<CountByApp> findStatistic(LocalDateTime start, LocalDateTime end, String[] uris);
 
     @Query("select new ru.practicum.explorewithme.model.CountByApp(app.name, app.uri, count(distinct stat.ip)) " +
