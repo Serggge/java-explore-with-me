@@ -32,13 +32,11 @@ public class StatServiceImpl implements StatService {
 
     @Override
     public ViewStats addHit(EndpointHit hitDto) {
-        String[] uriParts = hitDto.getUri().split("/");
-        String appUri = "/" + uriParts[uriParts.length - 2] + "/" + uriParts[uriParts.length - 1];
-        Optional<Application> optionalApp = appRepository.findByUriAndName(appUri, hitDto.getApp());
+        Optional<Application> optionalApp = appRepository.findByUriAndName(hitDto.getUri(), hitDto.getApp());
         Application app;
         if (optionalApp.isEmpty()) {
             app = new Application();
-            app.setUri(appUri);
+            app.setUri(hitDto.getUri());
             app.setName(hitDto.getApp());
             app = appRepository.save(app);
         } else {

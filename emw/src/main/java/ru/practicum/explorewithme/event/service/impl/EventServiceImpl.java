@@ -3,6 +3,7 @@ package ru.practicum.explorewithme.event.service.impl;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.explorewithme.category.model.Category_;
@@ -63,6 +64,7 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final EventRequestRepository eventRequestRepository;
     private final EventMapper eventMapper;
+    public final String appName;
 
     @Autowired
     public EventServiceImpl(EntityManager em,
@@ -71,7 +73,8 @@ public class EventServiceImpl implements EventService {
                             StatProxyService statService,
                             EventRepository eventRepository,
                             EventRequestRepository eventRequestRepository,
-                            EventMapper eventMapper) {
+                            EventMapper eventMapper,
+                            @Value("${app.name}") String appName) {
         this.em = em;
         this.categoryService = categoryService;
         this.userService = userService;
@@ -79,13 +82,14 @@ public class EventServiceImpl implements EventService {
         this.eventRepository = eventRepository;
         this.eventRequestRepository = eventRequestRepository;
         this.eventMapper = eventMapper;
+        this.appName = appName;
     }
 
     @Override
     public EventFullDto getEventById(long eventId, HttpServletRequest servletRequest) {
         Event foundedEvent = eventRepository.findByIdAndPublishedNotNull(eventId).orElseThrow(() ->
                 new EventNotFoundException(String.format("Event with id=%d was not found", eventId)));
-        ViewStats statDto = statService.addHit(servletRequest);
+        ViewStats statDto = statService.addHit(appName, "/events/" + eventId, servletRequest.getRemoteAddr());
         foundedEvent.setViews(statDto.getHits());
         fillRequestInfo(foundedEvent);
         return eventMapper.mapToFullDto(foundedEvent);
@@ -117,7 +121,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto getEventAddedByUser(long userId, long eventId, HttpServletRequest servletRequest) {
         log.debug("Get Event by ID={}, userID={}", eventId, userId);
         Event userEvent = getUserEvent(userId, eventId);
-        ViewStats statDto = statService.addHit(servletRequest);
+        ViewStats statDto = statService.addHit(appName, "/events/" + eventId, servletRequest.getRemoteAddr());
         userEvent.setViews(statDto.getHits());
         fillRequestInfo(userEvent);
         return eventMapper.mapToFullDto(userEvent);
@@ -247,26 +251,25 @@ public class EventServiceImpl implements EventService {
         typedQuery.setFirstResult(from);
         typedQuery.setMaxResults(size);
 
-        List<Event> resultList = typedQuery.getResultList();
-        fillStatistic(resultList);
-        fillRequestInfo(resultList);
-
+        List<Event> events = typedQuery.getResultList();
         if (onlyAvailable && sort == Sorting.VIEWS) {
-            resultList = resultList.stream()
+            events = events.stream()
                     .filter(event -> event.getConfirmedRequests() < event.getParticipantLimit())
                     .sorted(Comparator.comparingLong(Event::getViews).reversed())
                     .collect(Collectors.toList());
         } else if (!onlyAvailable && sort == Sorting.VIEWS) {
-            resultList = resultList.stream()
+            events = events.stream()
                     .sorted(Comparator.comparingLong(Event::getViews).reversed())
                     .collect(Collectors.toList());
         } else if (sort == Sorting.VIEWS) {
-            resultList = resultList.stream()
+            events = events.stream()
                     .filter(event -> event.getConfirmedRequests() < event.getParticipantLimit())
                     .collect(Collectors.toList());
         }
-        statService.addHit(servletRequest);
-        return eventMapper.mapToShortDto(resultList);
+        statService.addHit(appName, "/events", servletRequest.getRemoteAddr());
+        fillStatistic(events);
+        fillRequestInfo(events);
+        return eventMapper.mapToShortDto(events);
     }
 
     @Override

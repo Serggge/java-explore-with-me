@@ -7,7 +7,6 @@ import ru.practicum.explorewithme.dto.ViewStats;
 import ru.practicum.explorewithme.exception.clientServer.ServerResponseException;
 import ru.practicum.explorewithme.service.StatClient;
 import ru.practicum.explorewithme.service.StatsClientFactory;
-import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -19,21 +18,18 @@ import static ru.practicum.explorewithme.util.Constants.DATE_FORMAT;
 public class StatProxyServiceImpl implements StatProxyService {
 
     private final StatClient statClient;
-    private final String appName;
 
-    public StatProxyServiceImpl(@Value("${explore.stats-server.url}") String serviceUrl,
-                                @Value("${app.name}") String appName) {
+    public StatProxyServiceImpl(@Value("${explore.stats-server.url}") String serviceUrl) {
         this.statClient = StatsClientFactory.getClient(serviceUrl);
-        this.appName = appName;
     }
 
     @Override
-    public ViewStats addHit(HttpServletRequest request) {
+    public ViewStats addHit(String appName, String uri, String ip) {
         EndpointHit hitDto = EndpointHit
                 .builder()
                 .app(appName)
-                .uri(request.getRequestURI())
-                .ip(request.getRemoteAddr())
+                .uri(uri)
+                .ip(ip)
                 .timestamp(LocalDateTime.now())
                 .build();
         try {
