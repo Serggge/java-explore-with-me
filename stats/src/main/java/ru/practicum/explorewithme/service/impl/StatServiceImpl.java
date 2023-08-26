@@ -47,7 +47,7 @@ public class StatServiceImpl implements StatService {
         Statistic statistic = statMapper.mapToStatistic(hitDto, app);
         Statistic saved = statRepository.save(statistic);
         log.info("Новое событие: {}", saved);
-        return statMapper.mapToDto(statRepository.findStatistic(appUri));
+        return statMapper.mapToDto(statRepository.findUniqueStatistic(appUri));
     }
 
     @Override
@@ -55,7 +55,14 @@ public class StatServiceImpl implements StatService {
         start = decode(start);
         end = decode(end);
         uris = decode(uris);
-        String[] urisArray = uris.substring(1, uris.length() - 1).split(",");
+        String[] urisArray;
+        if (uris.matches("^[.+,.+]$")) {
+            urisArray = uris.substring(1, uris.length() - 1).split(",");
+        } else if (uris.matches("^[.+]$")) {
+            urisArray = new String[]{uris.substring(1, uris.length() - 1)};
+        } else {
+            urisArray = new String[]{uris};
+        }
         log.debug("Запрошена статистика с {} по {} для url: {}, уникальность={}", start, end, uris, unique);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime startTime = LocalDateTime.parse(start, formatter);
@@ -67,7 +74,7 @@ public class StatServiceImpl implements StatService {
         if (unique) {
             stats = statRepository.findUniqueStatistic(startTime, endTime, urisArray);
         } else {
-            stats = statRepository.findStatistic(startTime, endTime, urisArray);
+            stats = statRepository.findUniqueStatistic(startTime, endTime, urisArray);
         }
         return statMapper.mapToDto(stats);
     }
