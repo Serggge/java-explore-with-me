@@ -47,7 +47,8 @@ public class StatServiceImpl implements StatService {
         Statistic statistic = statMapper.mapToStatistic(hitDto, app);
         Statistic saved = statRepository.save(statistic);
         log.info("Новое событие: {}", saved);
-        return statMapper.mapToDto(statRepository.findUniqueStatistic(appUri));
+        CountByApp uniqueStatistic = statRepository.findUniqueStatistic(app.getUri(), app.getName());
+        return statMapper.mapToDto(uniqueStatistic);
     }
 
     @Override
@@ -74,7 +75,7 @@ public class StatServiceImpl implements StatService {
         if (unique) {
             stats = statRepository.findUniqueStatistic(startTime, endTime, urisArray);
         } else {
-            stats = statRepository.findUniqueStatistic(startTime, endTime, urisArray);
+            stats = statRepository.findStatistic(startTime, endTime, urisArray);
         }
         return statMapper.mapToDto(stats);
     }

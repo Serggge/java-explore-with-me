@@ -13,10 +13,11 @@ public interface StatRepository extends JpaRepository<Statistic, Long> {
             "from Statistic stat " +
             "join stat.app app " +
             "where app.uri = :uri " +
+            "and app.name = :appName " +
             "group by app.name, app.uri")
-    CountByApp findUniqueStatistic(String uri);
+    CountByApp findUniqueStatistic(String uri, String appName);
 
-    @Query("select new ru.practicum.explorewithme.model.CountByApp(app.name, app.uri, count(stat.ip)) " +
+    @Query("select new ru.practicum.explorewithme.model.CountByApp(app.name, app.uri, count(stat.id)) " +
             "from Statistic stat " +
             "join stat.app app " +
             "where stat.timestamp > :start " +
@@ -25,7 +26,7 @@ public interface StatRepository extends JpaRepository<Statistic, Long> {
             "order by count(stat.ip) desc")
     List<CountByApp> findStatistic(LocalDateTime start, LocalDateTime end);
 
-    @Query("select new ru.practicum.explorewithme.model.CountByApp(app.name, app.uri, count(stat.ip)) " +
+    @Query("select new ru.practicum.explorewithme.model.CountByApp(app.name, app.uri, count(stat.id)) " +
             "from Statistic stat " +
             "join stat.app app " +
             "where stat.timestamp > :start " +
