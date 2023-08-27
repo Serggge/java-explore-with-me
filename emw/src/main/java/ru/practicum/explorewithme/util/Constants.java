@@ -1,6 +1,7 @@
 package ru.practicum.explorewithme.util;
 
 import org.springframework.beans.factory.annotation.Value;
+
 import java.time.format.DateTimeFormatter;
 
 public final class Constants {
@@ -13,7 +14,7 @@ public final class Constants {
     private static String APPLICATION_NAME;
 
     @Value("${app.name}")
-    public void setAppName(String name){
+    public void setAppName(String name) {
         Constants.APPLICATION_NAME = name;
     }
 
