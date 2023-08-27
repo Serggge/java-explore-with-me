@@ -39,7 +39,13 @@ services:
       - stats-server
     environment:
       - EMW_SERVER_PORT=8080
-      - EXPLORE_STATS_SERVER_URL=http://stats-server:9090
+      - DB_HOST=explore_emw_db
+      - DB_PORT=5432
+      - DB_NAME=explore_emw
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+      - EXPLORE_STATS_SERVER_URL=stats-server:9090
+      - APP_NAME=emw-main-service
 
   ewm-db:
     image: postgres:14-alpine

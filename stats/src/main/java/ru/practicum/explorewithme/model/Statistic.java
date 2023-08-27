@@ -32,6 +32,6 @@ public class Statistic {
     @ManyToOne(fetch = FetchType.LAZY)
     private Application app;
     private String ip;
-    LocalDateTime timestamp;
+    private LocalDateTime timestamp;
 
 }

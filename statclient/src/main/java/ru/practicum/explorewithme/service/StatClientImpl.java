@@ -1,16 +1,14 @@
 package ru.practicum.explorewithme.service;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestTemplate;
-import ru.practicum.explorewithme.dto.HitDto;
-import ru.practicum.explorewithme.dto.ListStatisticDto;
-import ru.practicum.explorewithme.dto.StatisticDto;
+import ru.practicum.explorewithme.dto.EndpointHit;
+import ru.practicum.explorewithme.dto.ViewStats;
 import java.util.List;
 import java.util.Map;
+import static java.util.stream.Collectors.joining;
 
 public class StatClientImpl implements StatClient {
 
@@ -22,20 +20,19 @@ public class StatClientImpl implements StatClient {
         this.restTemplate = new RestTemplate();
     }
 
-    public HitDto sendHit(HitDto hitDto) {
-        HttpEntity<HitDto> request = new HttpEntity<>(hitDto);
-        return restTemplate.postForObject(statServiceUri + "/hit", request, HitDto.class);
+    public ViewStats sendHit(EndpointHit hitDto) {
+        HttpEntity<EndpointHit> request = new HttpEntity<>(hitDto);
+        String uri = "http://" + statServiceUri + "/hit";
+        return restTemplate.postForObject(uri, request, ViewStats.class);
     }
 
-    public List<StatisticDto> getStatisticByParams(Map<String, String> params) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-        params.forEach(map::add);
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
-        ListStatisticDto wrapperList = restTemplate.getForObject(statServiceUri + "/stats",
-                ListStatisticDto.class, request);
-        return wrapperList.getStatistic();
+    public List<ViewStats> getStatisticByParams(Map<String, String> requestParams) {
+        String domainUrl = "http://" + statServiceUri + "/stats?";
+        String fullUrl = requestParams.keySet().stream()
+                .map(key -> key + "=" + requestParams.get(key))
+                .collect(joining("&", domainUrl, ""));
+        return restTemplate.exchange(fullUrl, HttpMethod.GET, null,
+                new ParameterizedTypeReference<List<ViewStats>>(){}).getBody();
     }
 
 }
