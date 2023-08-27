@@ -6,8 +6,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestTemplate;
 import ru.practicum.explorewithme.dto.EndpointHit;
 import ru.practicum.explorewithme.dto.ViewStats;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import static java.util.stream.Collectors.joining;
