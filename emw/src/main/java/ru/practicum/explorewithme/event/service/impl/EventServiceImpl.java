@@ -54,18 +54,18 @@ public class EventServiceImpl implements EventService {
     private final EventRequestRepository eventRequestRepository;
     private final EventMapper eventMapper;
     @Value("${app.name}")
-    private static String appName;
+    private static String APP_NAME;
 
     @Autowired
-    public void setAppName(@Value("${app.name}") String appName) {
-        EventServiceImpl.appName = appName;
+    public void setAPP_NAME(@Value("${app.name}") String APP_NAME) {
+        EventServiceImpl.APP_NAME = APP_NAME;
     }
 
     @Override
     public EventFullDto getEventById(long eventId, HttpServletRequest servletRequest) {
         Event foundedEvent = eventRepository.findByIdAndPublishedNotNull(eventId).orElseThrow(() ->
                 new EventNotFoundException(String.format("Event with id=%d was not found", eventId)));
-        ViewStats statDto = statService.addHit(appName, "/events/" + eventId, servletRequest.getRemoteAddr());
+        ViewStats statDto = statService.addHit(APP_NAME, "/events/" + eventId, servletRequest.getRemoteAddr());
         foundedEvent.setViews(statDto.getHits());
         fillRequestInfo(foundedEvent);
         return eventMapper.mapToFullDto(foundedEvent);
@@ -97,7 +97,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto getEventAddedByUser(long userId, long eventId, HttpServletRequest servletRequest) {
         log.debug("Get Event by ID={}, userID={}", eventId, userId);
         Event userEvent = getUserEvent(userId, eventId);
-        ViewStats statDto = statService.addHit(appName, "/events/" + eventId, servletRequest.getRemoteAddr());
+        ViewStats statDto = statService.addHit(APP_NAME, "/events/" + eventId, servletRequest.getRemoteAddr());
         userEvent.setViews(statDto.getHits());
         fillRequestInfo(userEvent);
         return eventMapper.mapToFullDto(userEvent);
@@ -177,7 +177,7 @@ public class EventServiceImpl implements EventService {
                             || event.getRequestModeration() == Boolean.FALSE)
                     .collect(Collectors.toList());
         }
-        statService.addHit(appName, "/events", servletRequest.getRemoteAddr());
+        statService.addHit(APP_NAME, "/events", servletRequest.getRemoteAddr());
         fillStatistic(events);
         fillRequestInfo(events);
         return eventMapper.mapToShortDto(events);
