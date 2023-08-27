@@ -8,13 +8,10 @@ import ru.practicum.explorewithme.exception.clientServer.ServerResponseException
 import ru.practicum.explorewithme.service.StatClient;
 import ru.practicum.explorewithme.service.StatsClientFactory;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-
 import static ru.practicum.explorewithme.util.Constants.DATE_FORMAT;
 
 @Service
