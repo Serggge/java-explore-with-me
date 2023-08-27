@@ -36,6 +36,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import static ru.practicum.explorewithme.util.Constants.APP_NAME;
@@ -245,6 +246,7 @@ public class EventServiceImpl implements EventService {
     private void fillStatistic(Collection<Event> events) {
         events.stream()
                 .map(Event::getPublished)
+                .filter(Objects::nonNull)
                 .min(Comparator.naturalOrder())
                 .ifPresent(firstEventDate -> {
                     Map<String, ViewStats> statMap = statService.getStatistic(
