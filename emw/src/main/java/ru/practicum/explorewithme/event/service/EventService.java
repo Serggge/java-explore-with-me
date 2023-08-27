@@ -8,6 +8,7 @@ import ru.practicum.explorewithme.event.dto.UpdateEventRequest;
 import ru.practicum.explorewithme.event.model.Event;
 import ru.practicum.explorewithme.event.model.EventState;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collection;
 import java.util.List;
 
 public interface EventService {
@@ -36,4 +37,5 @@ public interface EventService {
     List<Event> getEvents(Iterable<Long> ids);
 
     List<EventFullDto> getAll();
+
 }

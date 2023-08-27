@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import java.util.List;
+import java.util.Set;
 
 @Setter
 @Getter
@@ -12,6 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 public class CategoriesDto {
 
-    private List<Long> categoryIds;
-    private List<String> categoryNames;
+    private Set<Long> categoryIds;
+    private Set<String> categoryNames;
 }

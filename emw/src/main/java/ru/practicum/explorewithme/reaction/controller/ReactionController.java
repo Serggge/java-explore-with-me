@@ -54,12 +54,11 @@ public class ReactionController {
     }
 
     @GetMapping("/popular")
-    public List<EventShortDto> returnPopularByPartEventName(@RequestParam String type,
-                                                            @RequestParam @Length(min = 2) String name,
+    public List<EventShortDto> returnPopularByPartEventName(@RequestParam @Length(min = 2) String text,
                                                             @RequestParam(defaultValue = "0") @Min(0) Integer from,
                                                             @RequestParam(defaultValue = "10") @Min(10) Integer size) {
-        log.debug("Request get popular events by part of name={}, has type={}, from={}, size={}", name, type, from, size);
-        return reactionService.getPopularByPartName(name, type, from, size);
+        log.debug("Request get popular events by part of name={}, from={}, size={}", text, from, size);
+        return reactionService.getPopularByPartName(text, from, size);
     }
 
     @GetMapping("/popular/category")
