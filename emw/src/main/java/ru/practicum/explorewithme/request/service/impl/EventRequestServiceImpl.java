@@ -1,5 +1,6 @@
 package ru.practicum.explorewithme.request.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,10 +25,11 @@ import ru.practicum.explorewithme.user.model.User;
 import ru.practicum.explorewithme.user.service.UserService;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor(onConstructor__ = @Autowired)
 @Slf4j
 public class EventRequestServiceImpl implements EventRequestService {
 
@@ -35,17 +37,6 @@ public class EventRequestServiceImpl implements EventRequestService {
     private final EventService eventService;
     private final EventRequestRepository eventRequestRepository;
     private final EventRequestMapper eventRequestMapper;
-
-    @Autowired
-    public EventRequestServiceImpl(UserService userService,
-                                   EventService eventService,
-                                   EventRequestRepository eventRequestRepository,
-                                   EventRequestMapper eventRequestMapper) {
-        this.userService = userService;
-        this.eventService = eventService;
-        this.eventRequestRepository = eventRequestRepository;
-        this.eventRequestMapper = eventRequestMapper;
-    }
 
     @Override
     public ParticipationRequestDto create(long requesterId, long eventId) {
@@ -156,14 +147,17 @@ public class EventRequestServiceImpl implements EventRequestService {
         }
         eventRequestRepository.saveAll(requests);
         EventRequestStatusUpdateResult result = new EventRequestStatusUpdateResult();
-        List<ParticipationRequestDto> confirmedRequests = eventRequestMapper.mapToDto(requests.stream()
-                .filter(request -> Status.CONFIRMED.equals(request.getStatus()))
-                .collect(Collectors.toList()));
-        result.setConfirmedRequests(confirmedRequests);
-        List<ParticipationRequestDto> rejectedRequests = eventRequestMapper.mapToDto(requests.stream()
-                .filter(request -> Status.REJECTED.equals(request.getStatus()))
-                .collect(Collectors.toList()));
-        result.setRejectedRequests(rejectedRequests);
+        List<ParticipationRequestDto> confirmed = new ArrayList<>();
+        List<ParticipationRequestDto> rejected = new ArrayList<>();
+        requests.forEach(request -> {
+            if (request.getStatus() == Status.CONFIRMED) {
+                confirmed.add(eventRequestMapper.mapToDto(request));
+            } else if (request.getStatus() == Status.REJECTED) {
+                rejected.add(eventRequestMapper.mapToDto(request));
+            }
+        });
+        result.setConfirmedRequests(confirmed);
+        result.setRejectedRequests(rejected);
         return result;
     }
 

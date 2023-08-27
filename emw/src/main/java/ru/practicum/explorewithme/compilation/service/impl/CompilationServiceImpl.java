@@ -1,5 +1,6 @@
 package ru.practicum.explorewithme.compilation.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +18,12 @@ import ru.practicum.explorewithme.compilation.service.CompilationService;
 import ru.practicum.explorewithme.event.model.Event;
 import ru.practicum.explorewithme.event.service.EventService;
 import ru.practicum.explorewithme.exception.notFound.CompilationNotFoundException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor(onConstructor__ = @Autowired)
 @Slf4j
 @Setter
 public class CompilationServiceImpl implements CompilationService {
@@ -29,21 +32,12 @@ public class CompilationServiceImpl implements CompilationService {
     private final CompilationMapper compilationMapper;
     private final EventService eventService;
 
-    @Autowired
-    public CompilationServiceImpl(CompilationRepository compilationRepository,
-                                  CompilationMapper compilationMapper,
-                                  EventService eventService) {
-        this.compilationRepository = compilationRepository;
-        this.compilationMapper = compilationMapper;
-        this.eventService = eventService;
-    }
-
     @Override
     public List<CompilationDto> getAll(Boolean pinned, int from, int size) {
         log.debug("Getting all Compilations by params. Pinned={}, from={}, size={}", pinned, from, size);
         Pageable page = PageRequest.of(from, size);
         Page<Compilation> comps;
-        if (pinned == null) {
+        if (pinned == null || pinned == Boolean.FALSE) {
             comps = compilationRepository.findAll(page);
         } else {
             comps = compilationRepository.findAllByPinned(pinned, page);
@@ -61,7 +55,12 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public CompilationDto addCompilation(NewCompilationDto dto) {
-        List<Event> events = eventService.getEvents(dto.getEvents());
+        List<Event> events;
+        if (dto.getEvents() != null && !dto.getEvents().isEmpty()) {
+            events = eventService.getEvents(dto.getEvents());
+        } else {
+            events = new ArrayList<>();
+        }
         Compilation comp = compilationMapper.mapToCompilation(dto, events);
         comp = compilationRepository.save(comp);
         log.info("Compilation created: {}", comp);
@@ -72,14 +71,18 @@ public class CompilationServiceImpl implements CompilationService {
     public CompilationDto update(long compId, UpdateCompilationRequest dto) {
         Compilation comp = compilationRepository.findById(compId).orElseThrow(() ->
                 new CompilationNotFoundException(String.format("Category with id=%d was not found", compId)));
-        if (dto.getTitle() != null) {
+        if (dto.getTitle() != null && !dto.getTitle().isBlank()) {
             comp.setTitle(dto.getTitle());
         }
         if (dto.getPinned() != null) {
             comp.setPinned(dto.getPinned());
         }
-        List<Event> events = eventService.getEvents(dto.getEvents());
-        comp.setEvents(new HashSet<>(events));
+        if (dto.getEvents() != null && !dto.getEvents().isEmpty()) {
+            List<Event> events = eventService.getEvents(dto.getEvents());
+            comp.setEvents(new HashSet<>(events));
+        } else {
+            comp.setEvents(new HashSet<>());
+        }
         comp = compilationRepository.save(comp);
         log.info("Compilation updated: {}", comp);
         return compilationMapper.mapToDto(comp);

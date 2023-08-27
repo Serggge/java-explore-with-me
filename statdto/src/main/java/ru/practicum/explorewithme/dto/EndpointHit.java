@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import java.time.LocalDateTime;
+import static ru.practicum.explorewithme.dto.Constants.DATE_PATTERN;
 
 @Getter
 @Setter
@@ -21,7 +22,7 @@ public class EndpointHit {
     private String app;
     private String uri;
     private String ip;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = DATE_PATTERN)
     private LocalDateTime timestamp;
 
 }

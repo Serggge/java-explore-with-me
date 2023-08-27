@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -14,6 +14,6 @@ import java.util.List;
 @ToString
 public class EventRequestStatusUpdateRequest {
 
-    private List<Long> requestIds;
+    private Set<Long> requestIds;
     private String status;
 }

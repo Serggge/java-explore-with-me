@@ -1,5 +1,6 @@
 package ru.practicum.explorewithme.event.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.explorewithme.category.model.Category;
@@ -21,16 +22,11 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor(onConstructor__ = @Autowired)
 public class EventMapperImpl implements EventMapper {
 
     private final CategoryMapper categoryMapper;
     private final UserMapper userMapper;
-
-    @Autowired
-    public EventMapperImpl(CategoryMapper categoryMapper, UserMapper userMapper) {
-        this.categoryMapper = categoryMapper;
-        this.userMapper = userMapper;
-    }
 
     @Override
     public Event mapToUpdatedEvent(NewEventDto dto, Map<String, Object> dependencies) {
@@ -60,17 +56,17 @@ public class EventMapperImpl implements EventMapper {
 
     @Override
     public Event mapToUpdatedEvent(UpdateEventRequest dto, Event event, Map<String, Object> dependencies) {
-        if (dto.getAnnotation() != null) {
+        if (dto.getAnnotation() != null && !dto.getAnnotation().isBlank()) {
             event.setAnnotation(dto.getAnnotation());
         }
         if (dto.getCategory() != null) {
             Category category = (Category) dependencies.get("category");
             event.setCategory(category);
         }
-        if (dto.getDescription() != null) {
+        if (dto.getDescription() != null && !dto.getDescription().isBlank()) {
             event.setDescription(dto.getDescription());
         }
-        if (dto.getEventDate() != null) {
+        if (dto.getEventDate() != null && dto.getEventDate().isAfter(LocalDateTime.now().plusHours(2))) {
             event.setEventDate(dto.getEventDate());
         }
         if (dto.getLocation() != null) {
@@ -83,7 +79,7 @@ public class EventMapperImpl implements EventMapper {
         if (dto.getParticipantLimit() != null) {
             event.setParticipantLimit(dto.getParticipantLimit());
         }
-        if (dto.getTitle() != null) {
+        if (dto.getTitle() != null && !dto.getTitle().isBlank()) {
             event.setTitle(dto.getTitle());
         }
         if (dto.getStateAction() != null) {

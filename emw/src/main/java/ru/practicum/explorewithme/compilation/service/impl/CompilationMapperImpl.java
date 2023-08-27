@@ -1,5 +1,6 @@
 package ru.practicum.explorewithme.compilation.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,24 +18,20 @@ import java.util.List;
 import java.util.TreeSet;
 
 @Component
+@RequiredArgsConstructor(onConstructor__ = @Autowired)
 @Setter
 public class CompilationMapperImpl implements CompilationMapper {
 
     private final EventMapper eventMapper;
 
-    @Autowired
-    public CompilationMapperImpl(EventMapper eventMapper) {
-        this.eventMapper = eventMapper;
-    }
-
     @Override
     public Compilation mapToCompilation(NewCompilationDto dto, List<Event> events) {
         Compilation comp = new Compilation();
         comp.setTitle(dto.getTitle());
-        if (dto.getPinned() == null || dto.getPinned() == Boolean.FALSE) {
+        if (dto.getPinned() == null) {
             comp.setPinned(Boolean.FALSE);
         } else {
-            comp.setPinned(Boolean.TRUE);
+            comp.setPinned(dto.getPinned());
         }
         comp.setEvents(new HashSet<>(events));
         return comp;

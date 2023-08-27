@@ -8,12 +8,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import static ru.practicum.explorewithme.utils.Constants.DATE_PATTERN;
 
 @RestControllerAdvice
 @Slf4j
 public class ErrorHandler {
 
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(DATE_PATTERN);
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)

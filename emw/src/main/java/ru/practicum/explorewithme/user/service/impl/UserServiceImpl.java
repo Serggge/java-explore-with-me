@@ -1,5 +1,6 @@
 package ru.practicum.explorewithme.user.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,7 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import ru.practicum.explorewithme.exception.illegal.UserAlreadyRegisteredException;
 import ru.practicum.explorewithme.exception.notFound.UserNotFoundException;
 import ru.practicum.explorewithme.user.dto.NewUserRequest;
 import ru.practicum.explorewithme.user.dto.UserDto;
@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor(onConstructor__ = @Autowired)
 @Setter
 @Slf4j
 public class UserServiceImpl implements UserService {
@@ -27,16 +28,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository,
-                           UserMapper userMapper) {
-        this.userRepository = userRepository;
-        this.userMapper = userMapper;
-    }
-
     @Override
     public UserDto add(NewUserRequest userDto) {
-        checkEmailAlreadyRegistered(userDto.getEmail());
         User newUser = userMapper.mapToUser(userDto);
         newUser = userRepository.save(newUser);
         log.info("User created: {}", newUser);
@@ -71,15 +64,6 @@ public class UserServiceImpl implements UserService {
             return optUser.get();
         } else {
             throw new UserNotFoundException(String.format("User with ID=%d not found", userId));
-        }
-    }
-
-    private void checkEmailAlreadyRegistered(String email) {
-        Optional<User> userByEmail = userRepository.findByEmail(email);
-        if (userByEmail.isPresent()) {
-            throw new UserAlreadyRegisteredException(
-                    String.format("User with email: %s already registered", email)
-            );
         }
     }
 

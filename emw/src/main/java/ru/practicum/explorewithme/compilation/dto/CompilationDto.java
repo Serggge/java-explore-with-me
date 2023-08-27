@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import ru.practicum.explorewithme.event.dto.EventShortDto;
-import java.util.TreeSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -16,7 +16,7 @@ import java.util.TreeSet;
 public class CompilationDto {
 
     private Long id;
-    private TreeSet<EventShortDto> events;
+    private Set<EventShortDto> events;
     private Boolean pinned;
     private String title;
 

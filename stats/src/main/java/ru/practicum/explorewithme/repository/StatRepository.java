@@ -35,7 +35,7 @@ public interface StatRepository extends JpaRepository<Statistic, Long> {
             "and app.uri in :uris " +
             "group by app.name, app.uri " +
             "order by count(stat.id) desc")
-    List<ViewStats> findStatistic(LocalDateTime start, LocalDateTime end, String[] uris);
+    List<ViewStats> findStatistic(LocalDateTime start, LocalDateTime end, List<String> uris);
 
     @Query("select new ru.practicum.explorewithme.dto.ViewStats(app.name, app.uri, count(distinct stat.ip)) " +
             "from Statistic stat " +
@@ -54,6 +54,6 @@ public interface StatRepository extends JpaRepository<Statistic, Long> {
             "and app.uri in :uris " +
             "group by app.name, app.uri " +
             "order by count(stat.ip) desc")
-    List<ViewStats> findUniqueStatistic(LocalDateTime start, LocalDateTime end, String[] uris);
+    List<ViewStats> findUniqueStatistic(LocalDateTime start, LocalDateTime end, List<String> uris);
 
 }

@@ -1,12 +1,12 @@
 package ru.practicum.explorewithme.event.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import ru.practicum.explorewithme.category.model.Category_;
 import ru.practicum.explorewithme.category.service.CategoryService;
 import ru.practicum.explorewithme.dto.ViewStats;
 import ru.practicum.explorewithme.event.dto.Categorized;
@@ -17,9 +17,9 @@ import ru.practicum.explorewithme.event.dto.Sorting;
 import ru.practicum.explorewithme.event.dto.UpdateEventRequest;
 import ru.practicum.explorewithme.event.model.Event;
 import ru.practicum.explorewithme.event.model.EventState;
-import ru.practicum.explorewithme.event.model.Event_;
 import ru.practicum.explorewithme.event.model.StateAction;
 import ru.practicum.explorewithme.event.repository.EventRepository;
+import ru.practicum.explorewithme.event.repository.dao.EventDao;
 import ru.practicum.explorewithme.event.service.EventMapper;
 import ru.practicum.explorewithme.event.service.EventService;
 import ru.practicum.explorewithme.exception.illegal.EventStateException;
@@ -28,22 +28,11 @@ import ru.practicum.explorewithme.exception.illegal.TimeLimitException;
 import ru.practicum.explorewithme.exception.notFound.EventNotFoundException;
 import ru.practicum.explorewithme.request.repository.EventRequestRepository;
 import ru.practicum.explorewithme.statistic.StatProxyService;
-import ru.practicum.explorewithme.user.model.User_;
 import ru.practicum.explorewithme.user.service.UserService;
-import static ru.practicum.explorewithme.util.Constants.DATE_FORMAT;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Tuple;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -52,44 +41,31 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor(onConstructor__ = @Autowired)
 @Setter
 @Slf4j
 public class EventServiceImpl implements EventService {
 
-    @PersistenceContext
-    private final EntityManager em;
     private final CategoryService categoryService;
     private final UserService userService;
     private final StatProxyService statService;
     private final EventRepository eventRepository;
+    private final EventDao eventDao;
     private final EventRequestRepository eventRequestRepository;
     private final EventMapper eventMapper;
-    public final String appName;
+    @Value("${app.name}")
+    private static String APP_NAME;
 
     @Autowired
-    public EventServiceImpl(EntityManager em,
-                            CategoryService categoryService,
-                            UserService userService,
-                            StatProxyService statService,
-                            EventRepository eventRepository,
-                            EventRequestRepository eventRequestRepository,
-                            EventMapper eventMapper,
-                            @Value("${app.name}") String appName) {
-        this.em = em;
-        this.categoryService = categoryService;
-        this.userService = userService;
-        this.statService = statService;
-        this.eventRepository = eventRepository;
-        this.eventRequestRepository = eventRequestRepository;
-        this.eventMapper = eventMapper;
-        this.appName = appName;
+    public void setAppName(@Value("${app.name}") String appName) {
+        APP_NAME = appName;
     }
 
     @Override
     public EventFullDto getEventById(long eventId, HttpServletRequest servletRequest) {
         Event foundedEvent = eventRepository.findByIdAndPublishedNotNull(eventId).orElseThrow(() ->
                 new EventNotFoundException(String.format("Event with id=%d was not found", eventId)));
-        ViewStats statDto = statService.addHit(appName, "/events/" + eventId, servletRequest.getRemoteAddr());
+        ViewStats statDto = statService.addHit(APP_NAME, "/events/" + eventId, servletRequest.getRemoteAddr());
         foundedEvent.setViews(statDto.getHits());
         fillRequestInfo(foundedEvent);
         return eventMapper.mapToFullDto(foundedEvent);
@@ -121,7 +97,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto getEventAddedByUser(long userId, long eventId, HttpServletRequest servletRequest) {
         log.debug("Get Event by ID={}, userID={}", eventId, userId);
         Event userEvent = getUserEvent(userId, eventId);
-        ViewStats statDto = statService.addHit(appName, "/events/" + eventId, servletRequest.getRemoteAddr());
+        ViewStats statDto = statService.addHit(APP_NAME, "/events/" + eventId, servletRequest.getRemoteAddr());
         userEvent.setViews(statDto.getHits());
         fillRequestInfo(userEvent);
         return eventMapper.mapToFullDto(userEvent);
@@ -171,102 +147,37 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventFullDto> getEventsAdminRequest(List<Long> userIds, List<EventState> states, List<Long> categories,
-                                                    String rangeStart, String rangeEnd, Integer from, Integer size) {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Event> cq = cb.createQuery(Event.class);
-        Root<Event> root = cq.from(Event.class);
-        root.fetch(Event_.category, JoinType.INNER);
-        root.fetch(Event_.initiator, JoinType.INNER);
-
-        cq.select(root);
-
-        List<Predicate> conditions = new ArrayList<>();
-        if (userIds != null) {
-            conditions.add(root.get(Event_.initiator).get(User_.id).in(userIds));
-        }
-        if (states != null) {
-            conditions.add(root.get(Event_.state).in(states));
-        }
-        if (categories != null) {
-            conditions.add(root.get(Event_.category).get(Category_.id).in(categories));
-        }
-        if (rangeStart != null && rangeEnd != null) {
-            conditions.add(cb.between(root.get(Event_.eventDate), LocalDateTime.parse(rangeStart, DATE_FORMAT),
-                    LocalDateTime.parse(rangeEnd, DATE_FORMAT)));
-        }
-
-        cq.where(conditions.toArray(new Predicate[0]));
-
-        TypedQuery<Event> typedQuery = em.createQuery(cq);
-        typedQuery.setFirstResult(from);
-        typedQuery.setMaxResults(size);
-        List<Event> resultList = typedQuery.getResultList();
-        fillStatistic(resultList);
-        fillRequestInfo(resultList);
-        return eventMapper.mapToFullDto(resultList);
+                                                    LocalDateTime rangeStart, LocalDateTime rangeEnd,
+                                                    Integer from, Integer size) {
+        List<Event> events = eventDao.findEventsAdminRequest(userIds, states, categories, rangeStart, rangeEnd, from, size);
+        fillStatistic(events);
+        fillRequestInfo(events);
+        return eventMapper.mapToFullDto(events);
     }
 
     @Override
     public List<EventShortDto> getEventsPublicRequest(String text, List<Long> categories, Boolean paid,
-                                                      String rangeStart, String rangeEnd, Boolean onlyAvailable,
-                                                      Sorting sort, Integer from, Integer size,
+                                                      LocalDateTime rangeStart, LocalDateTime rangeEnd,
+                                                      Boolean onlyAvailable, Sorting sort, Integer from, Integer size,
                                                       HttpServletRequest servletRequest) {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Event> cq = cb.createQuery(Event.class);
-        Root<Event> root = cq.from(Event.class);
-        root.fetch(Event_.category, JoinType.INNER);
-        root.fetch(Event_.initiator, JoinType.INNER);
-
-        cq.select(root);
-
-        List<Predicate> conditions = new ArrayList<>();
-        conditions.add(cb.isNotNull(root.get(Event_.published)));
-        if (text != null) {
-            String templateForSearch = "%" + text.toUpperCase() + "%";
-            Predicate textInAnnotation = cb.like(cb.upper(root.get(Event_.annotation)), templateForSearch);
-            Predicate textInDescription = cb.like(cb.upper(root.get(Event_.description)), templateForSearch);
-            conditions.add(cb.or(textInAnnotation, textInDescription));
-        }
-        if (categories != null) {
-            conditions.add(root.get(Event_.category).get(Category_.id).in(categories));
-        }
-        if (paid != null) {
-            conditions.add(cb.equal(root.get(Event_.paid), paid));
-        }
-
-        if (rangeStart == null || rangeEnd == null) {
-            conditions.add(cb.greaterThan(root.get(Event_.eventDate), LocalDateTime.now()));
-        } else {
-            conditions.add(cb.between(root.get(Event_.eventDate), LocalDateTime.parse(rangeStart, DATE_FORMAT),
-                    LocalDateTime.parse(rangeEnd, DATE_FORMAT)));
-        }
-
-        if (sort != null && sort.equals(Sorting.EVENT_DATE)) {
-            cq = cq.where(conditions.toArray(new Predicate[0])).orderBy(cb.asc(root.get(Event_.eventDate)));
-        } else {
-            cq = cq.where(conditions.toArray(new Predicate[0]));
-        }
-
-        TypedQuery<Event> typedQuery = em.createQuery(cq);
-        typedQuery.setFirstResult(from);
-        typedQuery.setMaxResults(size);
-
-        List<Event> events = typedQuery.getResultList();
+        List<Event> events = eventDao.findEventsPublicRequest(text, categories, paid, rangeStart, rangeEnd, sort, from, size);
         if (onlyAvailable && sort == Sorting.VIEWS) {
             events = events.stream()
-                    .filter(event -> event.getConfirmedRequests() < event.getParticipantLimit())
+                    .filter(event -> event.getConfirmedRequests() < event.getParticipantLimit()
+                            || event.getRequestModeration() == Boolean.FALSE)
                     .sorted(Comparator.comparingLong(Event::getViews).reversed())
                     .collect(Collectors.toList());
         } else if (!onlyAvailable && sort == Sorting.VIEWS) {
             events = events.stream()
                     .sorted(Comparator.comparingLong(Event::getViews).reversed())
                     .collect(Collectors.toList());
-        } else if (sort == Sorting.VIEWS) {
+        } else if (onlyAvailable) {
             events = events.stream()
-                    .filter(event -> event.getConfirmedRequests() < event.getParticipantLimit())
+                    .filter(event -> event.getConfirmedRequests() < event.getParticipantLimit()
+                            || event.getRequestModeration() == Boolean.FALSE)
                     .collect(Collectors.toList());
         }
-        statService.addHit(appName, "/events", servletRequest.getRemoteAddr());
+        statService.addHit(APP_NAME, "/events", servletRequest.getRemoteAddr());
         fillStatistic(events);
         fillRequestInfo(events);
         return eventMapper.mapToShortDto(events);
@@ -325,33 +236,43 @@ public class EventServiceImpl implements EventService {
     }
 
     private void fillStatistic(Event event) {
-        String[] uri = new String[]{"/events/" + event.getId()};
-        List<ViewStats> statistic = statService.getStatistic(
-                LocalDateTime.now().minusYears(1), LocalDateTime.now(), uri, false);
-        if (statistic.size() == 1) {
-            event.setViews(statistic.get(0).getHits());
+        if (event.getPublished() != null) {
+            Set<String> uri = Collections.singleton("/events/" + event.getId());
+            List<ViewStats> statistic = statService.getStatistic(event.getPublished(), LocalDateTime.now(), uri, false);
+            if (statistic.size() == 1) {
+                event.setViews(statistic.get(0).getHits());
+            } else {
+                event.setViews(0);
+            }
         } else {
             event.setViews(0);
         }
     }
 
     private void fillStatistic(Collection<Event> events) {
-        String[] uris = events
-                .stream()
+        events.stream()
+                .map(Event::getPublished)
+                .min(Comparator.naturalOrder())
+                .ifPresent(firstEventDate -> {
+                    Map<String, ViewStats> statMap = statService.getStatistic(
+                                    firstEventDate, LocalDateTime.now(), makeUri(events), true)
+                            .stream()
+                            .collect(Collectors.toMap(ViewStats::getUri, stat -> stat));
+                    for (Event event : events) {
+                        String appUri = "/events/" + event.getId();
+                        if (statMap.containsKey(appUri)) {
+                            event.setViews(statMap.get(appUri).getHits());
+                        } else {
+                            event.setViews(0);
+                        }
+                    }
+                });
+    }
+
+    private Set<String> makeUri(Collection<Event> events) {
+        return events.stream()
                 .map(event -> "/events/" + event.getId())
-                .toArray(String[]::new);
-        Map<String, ViewStats> statMap = statService.getStatistic(
-                        LocalDateTime.now().minusYears(1), LocalDateTime.now(), uris, true)
-                .stream()
-                .collect(Collectors.toMap(ViewStats::getUri, stat -> stat));
-        for (Event event : events) {
-            String appUri = "/events/" + event.getId();
-            if (statMap.containsKey(appUri)) {
-                event.setViews(statMap.get(appUri).getHits());
-            } else {
-                event.setViews(0);
-            }
-        }
+                .collect(Collectors.toSet());
     }
 
     private void fillRequestInfo(Event event) {
@@ -364,18 +285,7 @@ public class EventServiceImpl implements EventService {
                 .stream()
                 .map(Event::getId)
                 .collect(Collectors.toSet());
-        Map<Long, Long> requestsMap = em.createQuery(
-                        "select event.id as eventId, count(request.id) as count " +
-                                "from Request request " +
-                                "join request.event event " +
-                                "where event.id in :eventsIds " +
-                                "group by event.id", Tuple.class)
-                .setParameter("eventsIds", eventsIds)
-                .getResultStream()
-                .collect(Collectors.toMap(
-                        tuple -> ((Number) tuple.get("eventId")).longValue(),
-                        tuple -> ((Number) tuple.get("count")).longValue()
-                ));
+        Map<Long, Long> requestsMap = eventDao.getRequestsCount(eventsIds);
         for (Event event : events) {
             event.setConfirmedRequests(requestsMap.getOrDefault(event.getId(), 0L));
         }

@@ -12,12 +12,8 @@ import ru.practicum.explorewithme.repository.AppRepository;
 import ru.practicum.explorewithme.repository.StatRepository;
 import ru.practicum.explorewithme.service.StatMapper;
 import ru.practicum.explorewithme.service.StatService;
-
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,38 +46,18 @@ public class StatServiceImpl implements StatService {
     }
 
     @Override
-    public List<ViewStats> getStatistic(String start, String end, String uris, Boolean unique) {
-        start = decode(start);
-        end = decode(end);
-        uris = decode(uris);
-        String[] urisArray;
-        if (uris.matches("^[.+,.+]$")) {
-            urisArray = uris.substring(1, uris.length() - 1).split(",");
-        } else if (uris.matches("^[.+]$")) {
-            urisArray = new String[]{uris.substring(1, uris.length() - 1)};
-        } else if (uris.contains(",")) {
-            urisArray = uris.split(",");
-        } else {
-            urisArray = new String[]{uris};
-        }
+    public List<ViewStats> getStatistic(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
         log.debug("Запрошена статистика с {} по {} для url: {}, уникальность={}", start, end, uris, unique);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime startTime = LocalDateTime.parse(start, formatter);
-        LocalDateTime endTime = LocalDateTime.parse(end, formatter);
-        if (endTime.isBefore(startTime)) {
+        if (end.isBefore(start)) {
             throw new DateTimeException("Start time can't be after end time");
         }
         List<ViewStats> stats;
         if (unique) {
-            stats = statRepository.findUniqueStatistic(startTime, endTime, urisArray);
+            stats = statRepository.findUniqueStatistic(start, end, uris);
         } else {
-            stats = statRepository.findStatistic(startTime, endTime, urisArray);
+            stats = statRepository.findStatistic(start, end, uris);
         }
         return stats;
-    }
-
-    private String decode(String value) {
-        return URLDecoder.decode(value, StandardCharsets.UTF_8);
     }
 
 }

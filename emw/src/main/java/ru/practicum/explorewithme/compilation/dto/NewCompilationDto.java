@@ -7,7 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
-import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -16,7 +16,7 @@ import java.util.List;
 @ToString
 public class NewCompilationDto {
 
-    private List<Long> events;
+    private Set<Long> events;
     private Boolean pinned;
     @NotBlank
     @Size(min = 1, max = 50)

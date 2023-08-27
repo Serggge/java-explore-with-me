@@ -1,5 +1,6 @@
 package ru.practicum.explorewithme.category.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,27 +23,19 @@ import java.util.Optional;
 @Service
 @Setter
 @Slf4j
+@RequiredArgsConstructor(onConstructor__ = @Autowired)
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
     private final EventRepository eventRepository;
 
-    @Autowired
-    public CategoryServiceImpl(CategoryRepository categoryRepository,
-                               CategoryMapper categoryMapper,
-                               EventRepository eventRepository) {
-        this.categoryRepository = categoryRepository;
-        this.categoryMapper = categoryMapper;
-        this.eventRepository = eventRepository;
-    }
-
     @Override
     public CategoryDto add(NewCategoryDto dto) {
-            Category newCategory = categoryMapper.mapToCategory(dto);
-            newCategory = categoryRepository.save(newCategory);
-            log.info("Category created: {}", newCategory);
-            return categoryMapper.mapToDto(newCategory);
+        Category newCategory = categoryMapper.mapToCategory(dto);
+        newCategory = categoryRepository.save(newCategory);
+        log.info("Category created: {}", newCategory);
+        return categoryMapper.mapToDto(newCategory);
     }
 
     @Override
@@ -58,10 +51,10 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto update(long catId, NewCategoryDto dto) {
         Category categoryById = getCategoryById(catId);
-            categoryById.setName(dto.getName());
-            categoryById = categoryRepository.save(categoryById);
-            log.info("Category with ID={} updated: {}", catId, categoryById);
-            return categoryMapper.mapToDto(categoryById);
+        categoryById.setName(dto.getName());
+        categoryById = categoryRepository.save(categoryById);
+        log.info("Category with ID={} updated: {}", catId, categoryById);
+        return categoryMapper.mapToDto(categoryById);
     }
 
     @Override

@@ -8,6 +8,7 @@ import ru.practicum.explorewithme.event.dto.UpdateEventRequest;
 import ru.practicum.explorewithme.event.model.Event;
 import ru.practicum.explorewithme.event.model.EventState;
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface EventService {
@@ -23,10 +24,10 @@ public interface EventService {
     EventFullDto updateEventAdminRequest(long eventId, UpdateEventRequest dto);
 
     List<EventFullDto> getEventsAdminRequest(List<Long> userIds, List<EventState> states, List<Long> categories,
-                                             String rangeStart, String rangeEnd, Integer from, Integer size);
+                                             LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size);
 
-    List<EventShortDto> getEventsPublicRequest(String text, List<Long> categories, Boolean paid, String rangeStart,
-                                               String rangeEnd, Boolean onlyAvailable, Sorting sort, Integer from,
+    List<EventShortDto> getEventsPublicRequest(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart,
+                                               LocalDateTime rangeEnd, Boolean onlyAvailable, Sorting sort, Integer from,
                                                Integer size, HttpServletRequest servletRequest);
 
     EventFullDto getEventById(long eventId, HttpServletRequest servletRequest);

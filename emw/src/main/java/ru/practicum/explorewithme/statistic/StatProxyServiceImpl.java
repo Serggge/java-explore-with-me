@@ -12,6 +12,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import static ru.practicum.explorewithme.util.Constants.DATE_FORMAT;
 
 @Service
@@ -40,11 +43,11 @@ public class StatProxyServiceImpl implements StatProxyService {
     }
 
     @Override
-    public List<ViewStats> getStatistic(LocalDateTime start, LocalDateTime end, String[] uris, Boolean unique) {
+    public List<ViewStats> getStatistic(LocalDateTime start, LocalDateTime end, Set<String> uris, Boolean unique) {
         Map<String, String> params = new HashMap<>();
         params.put("start", start.format(DATE_FORMAT));
         params.put("end", end.format(DATE_FORMAT));
-        params.put("uris", Arrays.toString(uris));
+        params.put("uris", String.join(",", uris));
         params.put("unique", unique.toString());
         return statClient.getStatisticByParams(params);
     }

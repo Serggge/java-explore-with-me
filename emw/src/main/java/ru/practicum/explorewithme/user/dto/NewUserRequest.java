@@ -7,7 +7,6 @@ import lombok.Setter;
 import lombok.ToString;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Getter
@@ -17,7 +16,7 @@ import javax.validation.constraints.Size;
 @ToString
 public class NewUserRequest {
 
-    @NotNull
+    @NotBlank
     @Email
     @Size(min = 6, max = 254)
     private String email;

@@ -1,5 +1,6 @@
 package ru.practicum.explorewithme.category.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,19 +18,16 @@ import ru.practicum.explorewithme.category.dto.CategoryDto;
 import ru.practicum.explorewithme.category.dto.NewCategoryDto;
 import ru.practicum.explorewithme.category.service.CategoryService;
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor(onConstructor__ = @Autowired)
 @Slf4j
 @Validated
 public class CategoryController {
 
     private final CategoryService categoryService;
-
-    @Autowired
-    public CategoryController(CategoryService categoryService) {
-        this.categoryService = categoryService;
-    }
 
     @PostMapping("/admin/categories")
     @ResponseStatus(HttpStatus.CREATED)
@@ -40,27 +38,27 @@ public class CategoryController {
 
     @DeleteMapping("/admin/categories/{catId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeCategory(@PathVariable Long catId) {
+    public void removeCategory(@PathVariable @Min(1) Long catId) {
         log.debug("Request for deleting Category with ID=" + catId);
         categoryService.delete(catId);
     }
 
     @PatchMapping("/admin/categories/{catId}")
-    public CategoryDto changeCategoryName(@PathVariable Long catId,
+    public CategoryDto changeCategoryName(@PathVariable @Min(1) Long catId,
                                           @RequestBody @Valid NewCategoryDto categoryDto) {
         log.debug("Request for patch Category with ID=" + catId);
         return categoryService.update(catId, categoryDto);
     }
 
     @GetMapping("/categories")
-    public List<CategoryDto> returnCategories(@RequestParam(defaultValue = "0") Integer from,
-                                              @RequestParam(defaultValue = "10") Integer size) {
+    public List<CategoryDto> returnCategories(@RequestParam(defaultValue = "0") @Min(0) Integer from,
+                                              @RequestParam(defaultValue = "10") @Min(1) Integer size) {
         log.debug("Request for getting all categories, from={}, size={}", from, size);
         return categoryService.getAll(from, size);
     }
 
     @GetMapping("/categories/{catId}")
-    public CategoryDto returnCategoryById(@PathVariable Long catId) {
+    public CategoryDto returnCategoryById(@PathVariable @Min(1) Long catId) {
         log.debug("Request for getting Category by ID=" + catId);
         return categoryService.getById(catId);
     }

@@ -1,9 +1,9 @@
 package ru.practicum.explorewithme.controller;
 
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,21 +15,17 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.explorewithme.dto.EndpointHit;
 import ru.practicum.explorewithme.dto.ViewStats;
 import ru.practicum.explorewithme.service.StatService;
+import java.time.LocalDateTime;
 import java.util.List;
+import static ru.practicum.explorewithme.utils.Constants.DATE_PATTERN;
 
 @RestController
-@NoArgsConstructor
-@Setter
+@RequiredArgsConstructor(onConstructor__ = @Autowired)
 @RequestMapping("/")
 @Slf4j
 public class StatsController {
 
-    private StatService statService;
-
-    @Autowired
-    public StatsController(StatService statService) {
-        this.statService = statService;
-    }
+    private final StatService statService;
 
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
@@ -39,9 +35,13 @@ public class StatsController {
     }
 
     @GetMapping("/stats")
-    public List<ViewStats> view(@RequestParam String start,
-                                @RequestParam String end,
-                                @RequestParam(required = false) String uris,
+    public List<ViewStats> view(@RequestParam
+                                @DateTimeFormat(pattern = DATE_PATTERN)
+                                LocalDateTime start,
+                                @RequestParam
+                                @DateTimeFormat(pattern = DATE_PATTERN)
+                                LocalDateTime end,
+                                @RequestParam(required = false) List<String> uris,
                                 @RequestParam(defaultValue = "false") Boolean unique) {
         log.debug("Getting statistic: start: {} end: {} uris: {} unique: {}", start, end, uris, unique);
         return statService.getStatistic(start, end, uris, unique);

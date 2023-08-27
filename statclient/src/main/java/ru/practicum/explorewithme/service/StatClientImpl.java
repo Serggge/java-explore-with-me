@@ -29,16 +29,12 @@ public class StatClientImpl implements StatClient {
     }
 
     public List<ViewStats> getStatisticByParams(Map<String, String> requestParams) {
-        String serverUri = "http://" + statServiceUri + "/stats?";
-        String encodedURL = requestParams.keySet().stream()
-                .map(key -> key + "=" + encodeValue(requestParams.get(key)))
-                .collect(joining("&", serverUri, ""));
-        return restTemplate.exchange(encodedURL, HttpMethod.GET, null,
+        String domainUrl = "http://" + statServiceUri + "/stats?";
+        String fullUrl = requestParams.keySet().stream()
+                .map(key -> key + "=" + requestParams.get(key))
+                .collect(joining("&", domainUrl, ""));
+        return restTemplate.exchange(fullUrl, HttpMethod.GET, null,
                 new ParameterizedTypeReference<List<ViewStats>>(){}).getBody();
-    }
-
-    private String encodeValue(String value) {
-        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
 }

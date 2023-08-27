@@ -1,5 +1,6 @@
 package ru.practicum.explorewithme.user.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,16 +21,12 @@ import javax.validation.constraints.Min;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor(onConstructor__ = @Autowired)
 @Slf4j
 @Validated
 public class UserController {
 
     private final UserService userService;
-
-    @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
 
     @PostMapping("/admin/users")
     @ResponseStatus(HttpStatus.CREATED)
@@ -40,7 +37,7 @@ public class UserController {
 
     @DeleteMapping("/admin/users/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeUser(@PathVariable long userId) {
+    public void removeUser(@PathVariable @Min(1) Long userId) {
         log.debug("Request for deleting user with ID=" + userId);
         userService.delete(userId);
     }
