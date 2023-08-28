@@ -326,7 +326,7 @@
 				"method": "POST",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/events/106/users/1/like?positive=true",
+					"raw": "http://localhost:8080/events/106/users/136/like?positive=true",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -336,7 +336,7 @@
 						"events",
 						"106",
 						"users",
-						"1",
+						"136",
 						"like"
 					],
 					"query": [
