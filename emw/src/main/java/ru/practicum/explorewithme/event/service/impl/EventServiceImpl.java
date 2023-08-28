@@ -18,7 +18,6 @@ import ru.practicum.explorewithme.event.model.Event;
 import ru.practicum.explorewithme.event.model.EventState;
 import ru.practicum.explorewithme.event.model.StateAction;
 import ru.practicum.explorewithme.event.repository.EventRepository;
-import ru.practicum.explorewithme.event.repository.dao.EventDao;
 import ru.practicum.explorewithme.event.service.EventMapper;
 import ru.practicum.explorewithme.event.service.EventService;
 import ru.practicum.explorewithme.exception.illegal.EventStateException;
@@ -51,7 +50,6 @@ public class EventServiceImpl implements EventService {
     private final UserService userService;
     private final StatProxyService statService;
     private final EventRepository eventRepository;
-    private final EventDao eventDao;
     private final EventRequestRepository eventRequestRepository;
     private final EventMapper eventMapper;
 
@@ -143,7 +141,7 @@ public class EventServiceImpl implements EventService {
     public List<EventFullDto> getEventsAdminRequest(List<Long> userIds, List<EventState> states, List<Long> categories,
                                                     LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                                     Integer from, Integer size) {
-        List<Event> events = eventDao.findEventsAdminRequest(userIds, states, categories, rangeStart, rangeEnd, from, size);
+        List<Event> events = eventRepository.findEventsAdminRequest(userIds, states, categories, rangeStart, rangeEnd, from, size);
         fillStatistic(events);
         fillRequestInfo(events);
         return eventMapper.mapToFullDto(events);
@@ -154,7 +152,7 @@ public class EventServiceImpl implements EventService {
                                                       LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                                       Boolean onlyAvailable, Sorting sort, Integer from, Integer size,
                                                       HttpServletRequest servletRequest) {
-        List<Event> events = eventDao.findEventsPublicRequest(text, categories, paid, rangeStart, rangeEnd, sort, from, size);
+        List<Event> events = eventRepository.findEventsPublicRequest(text, categories, paid, rangeStart, rangeEnd, sort, from, size);
         if (onlyAvailable && sort == Sorting.VIEWS) {
             events = events.stream()
                     .filter(event -> event.getConfirmedRequests() < event.getParticipantLimit()
@@ -280,7 +278,7 @@ public class EventServiceImpl implements EventService {
                 .stream()
                 .map(Event::getId)
                 .collect(Collectors.toSet());
-        Map<Long, Long> requestsMap = eventDao.getRequestsCount(eventsIds);
+        Map<Long, Long> requestsMap = eventRepository.getRequestsCount(eventsIds);
         for (Event event : events) {
             event.setConfirmedRequests(requestsMap.getOrDefault(event.getId(), 0L));
         }

@@ -97,7 +97,7 @@ public class ErrorHandler {
     public ApiError handleEntityExistsException(EntityExistsException exception) {
         log.info("{}: {}", exception.getClass().getSimpleName(), exception.getMessage());
         return ApiError.builder()
-                .status(HttpStatus.FORBIDDEN.name())
+                .status(HttpStatus.CONFLICT.name())
                 .reason("For the requested operation the conditions are not met.")
                 .message(exception.getMessage())
                 .timestamp(LocalDateTime.now().format(DATE_FORMAT))
@@ -133,7 +133,7 @@ public class ErrorHandler {
     public ApiError handleTimeLimitException(TimeLimitException exception) {
         log.info("{}: {}", exception.getClass().getSimpleName(), exception.getMessage());
         return ApiError.builder()
-                .status(HttpStatus.FORBIDDEN.name())
+                .status(HttpStatus.CONFLICT.name())
                 .reason("For the requested operation the conditions are not met.")
                 .message(exception.getMessage())
                 .timestamp(LocalDateTime.now().format(DATE_FORMAT))
@@ -145,7 +145,7 @@ public class ErrorHandler {
     public ApiError handleUserMatchingException(UserMatchingException exception) {
         log.info("{}: {}", exception.getClass().getSimpleName(), exception.getMessage());
         return ApiError.builder()
-                .status(HttpStatus.FORBIDDEN.name())
+                .status(HttpStatus.CONFLICT.name())
                 .reason("For the requested operation the conditions are not met.")
                 .message(exception.getMessage())
                 .timestamp(LocalDateTime.now().format(DATE_FORMAT))
@@ -157,7 +157,7 @@ public class ErrorHandler {
     public ApiError handleEventStateException(EventStateException exception) {
         log.info("{}: {}", exception.getClass().getSimpleName(), exception.getMessage());
         return ApiError.builder()
-                .status(HttpStatus.FORBIDDEN.name())
+                .status(HttpStatus.CONFLICT.name())
                 .reason("For the requested operation the conditions are not met.")
                 .message(exception.getMessage())
                 .timestamp(LocalDateTime.now().format(DATE_FORMAT))
@@ -169,7 +169,7 @@ public class ErrorHandler {
     public ApiError handleRequestLimitException(RequestLimitException exception) {
         log.info("{}: {}", exception.getClass().getSimpleName(), exception.getMessage());
         return ApiError.builder()
-                .status(HttpStatus.FORBIDDEN.name())
+                .status(HttpStatus.CONFLICT.name())
                 .reason("For the requested operation the conditions are not met.")
                 .message(exception.getMessage())
                 .timestamp(LocalDateTime.now().format(DATE_FORMAT))
@@ -181,8 +181,20 @@ public class ErrorHandler {
     public ApiError handleEntityStateException(EntityStateException exception) {
         log.info("{}: {}", exception.getClass().getSimpleName(), exception.getMessage());
         return ApiError.builder()
-                .status(HttpStatus.FORBIDDEN.name())
+                .status(HttpStatus.CONFLICT.name())
                 .reason("For the requested operation the conditions are not met.")
+                .message(exception.getMessage())
+                .timestamp(LocalDateTime.now().format(DATE_FORMAT))
+                .build();
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ApiError handleThrowable(Throwable exception) {
+        log.error("Unknown error: {}", exception.getMessage(), exception);
+        return ApiError.builder()
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.name())
+                .reason("UNKNOWN ERROR.")
                 .message(exception.getMessage())
                 .timestamp(LocalDateTime.now().format(DATE_FORMAT))
                 .build();
