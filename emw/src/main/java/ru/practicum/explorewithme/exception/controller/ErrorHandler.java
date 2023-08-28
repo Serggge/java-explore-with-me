@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.practicum.explorewithme.exception.clientServer.ServerResponseException;
 import ru.practicum.explorewithme.exception.dto.ApiError;
 import ru.practicum.explorewithme.exception.illegal.CategoryNotEmptyException;
 import ru.practicum.explorewithme.exception.illegal.EntityExistsException;
@@ -197,6 +198,18 @@ public class ErrorHandler {
                 .status(HttpStatus.CONFLICT.name())
                 .reason("For the requested operation the conditions are not met.")
                 .message(exception.getMessage())
+                .timestamp(LocalDateTime.now().format(DATE_FORMAT))
+                .build();
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public ApiError handleServerResponseException(ServerResponseException exception) {
+        log.error("{}: {}", exception.getClass().getSimpleName(), exception.getMessage());
+        return ApiError.builder()
+                .status(HttpStatus.SERVICE_UNAVAILABLE.name())
+                .reason("Server is not available.")
+                .message("Statistic server is not available")
                 .timestamp(LocalDateTime.now().format(DATE_FORMAT))
                 .build();
     }

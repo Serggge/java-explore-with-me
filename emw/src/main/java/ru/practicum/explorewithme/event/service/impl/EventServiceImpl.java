@@ -24,6 +24,9 @@ import ru.practicum.explorewithme.exception.illegal.EventStateException;
 import ru.practicum.explorewithme.exception.illegal.UserMatchingException;
 import ru.practicum.explorewithme.exception.illegal.TimeLimitException;
 import ru.practicum.explorewithme.exception.notFound.EventNotFoundException;
+import ru.practicum.explorewithme.reaction.dto.CategoriesDto;
+import ru.practicum.explorewithme.reaction.repository.view.Reactions;
+import ru.practicum.explorewithme.reaction.service.ReactionService;
 import ru.practicum.explorewithme.request.repository.EventRequestRepository;
 import ru.practicum.explorewithme.statistic.StatProxyService;
 import ru.practicum.explorewithme.user.service.UserService;
@@ -49,6 +52,7 @@ public class EventServiceImpl implements EventService {
     private final CategoryService categoryService;
     private final UserService userService;
     private final StatProxyService statService;
+    private final ReactionService reactionService;
     private final EventRepository eventRepository;
     private final EventRequestRepository eventRequestRepository;
     private final EventMapper eventMapper;
@@ -60,6 +64,7 @@ public class EventServiceImpl implements EventService {
         ViewStats statDto = statService.addHit(APP_NAME, "/events/" + eventId, servletRequest.getRemoteAddr());
         foundedEvent.setViews(statDto.getHits());
         fillRequestInfo(foundedEvent);
+        fillReactions(foundedEvent);
         return eventMapper.mapToFullDto(foundedEvent);
     }
 
@@ -92,6 +97,7 @@ public class EventServiceImpl implements EventService {
         ViewStats statDto = statService.addHit(APP_NAME, "/events/" + eventId, servletRequest.getRemoteAddr());
         userEvent.setViews(statDto.getHits());
         fillRequestInfo(userEvent);
+        fillReactions(userEvent);
         return eventMapper.mapToFullDto(userEvent);
     }
 
@@ -106,6 +112,7 @@ public class EventServiceImpl implements EventService {
             log.info("Event updated: {}", updatedEvent);
             fillStatistic(updatedEvent);
             fillRequestInfo(updatedEvent);
+            fillReactions(updatedEvent);
             return eventMapper.mapToFullDto(updatedEvent);
         } else {
             throw new EventStateException("Only pending or canceled events can be changed");
@@ -133,6 +140,7 @@ public class EventServiceImpl implements EventService {
             log.info("Event updated: {}", updatedEvent);
             fillStatistic(updatedEvent);
             fillRequestInfo(updatedEvent);
+            fillReactions(updatedEvent);
             return eventMapper.mapToFullDto(updatedEvent);
         }
     }
@@ -192,6 +200,41 @@ public class EventServiceImpl implements EventService {
         return events;
     }
 
+    @Override
+    public List<EventFullDto> getAll() {
+        return eventMapper.mapToFullDto(eventRepository.findAll())
+                .stream()
+                .sorted(Comparator.comparingLong(EventFullDto::getId))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<EventShortDto> getPopularEvents(Long categoryId, int from, int size) {
+        Map<Long, Long> popularity = reactionService.getPopularEvents(categoryId, from, size);
+        List<Event> events = eventRepository.findAllByIds(popularity.keySet());
+        fillRequestInfo(events);
+        fillStatistic(events);
+        return eventMapper.mapToShortDto(events);
+    }
+
+    @Override
+    public List<EventShortDto> getPopularEvents(CategoriesDto catDto, int from, int size) {
+        Map<Long, Long> popularity = reactionService.getPopularEvents(catDto, from, size);
+        List<Event> events = eventRepository.findAllByIds(popularity.keySet());
+        fillRequestInfo(events);
+        fillStatistic(events);
+        return eventMapper.mapToShortDto(events);
+    }
+
+    @Override
+    public List<EventShortDto> getPopularByPartName(String text, int from, int size) {
+        Map<Long, Long> popularity = reactionService.getPopularByPartName(text, from, size);
+        List<Event> events = eventRepository.findAllByIds(popularity.keySet());
+        fillRequestInfo(events);
+        fillStatistic(events);
+        return eventMapper.mapToShortDto(events);
+    }
+
     private void validateEventStartDate(LocalDateTime dtoEventDate, LocalDateTime otherDate, int hours) {
         if (dtoEventDate != null && otherDate != null && dtoEventDate.isBefore(otherDate.plusHours(hours))) {
             throw new TimeLimitException("Less than two hours before start of event");
@@ -217,14 +260,6 @@ public class EventServiceImpl implements EventService {
                     String.format("User with id=%d is not initiator of Event with ID=%d", userId, eventId));
         }
         return foundedEvent;
-    }
-
-    @Override
-    public List<EventFullDto> getAll() {
-        return eventMapper.mapToFullDto(eventRepository.findAll())
-                .stream()
-                .sorted(Comparator.comparingLong(EventFullDto::getId))
-                .collect(Collectors.toList());
     }
 
     private void fillStatistic(Event event) {
@@ -282,6 +317,12 @@ public class EventServiceImpl implements EventService {
         for (Event event : events) {
             event.setConfirmedRequests(requestsMap.getOrDefault(event.getId(), 0L));
         }
+    }
+
+    private void fillReactions(Event event) {
+        Reactions reactions = reactionService.getReactions(event.getId());
+        event.setLikes(reactions.getLikes());
+        event.setDislikes(reactions.getDislikes());
     }
 
 }

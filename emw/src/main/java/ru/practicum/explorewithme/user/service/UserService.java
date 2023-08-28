@@ -2,6 +2,7 @@ package ru.practicum.explorewithme.user.service;
 
 import ru.practicum.explorewithme.user.dto.NewUserRequest;
 import ru.practicum.explorewithme.user.dto.UserDto;
+import ru.practicum.explorewithme.user.dto.UserShortDto;
 import ru.practicum.explorewithme.user.model.User;
 import java.util.List;
 
@@ -14,4 +15,6 @@ public interface UserService {
     List<UserDto> getAll(Long[] ids, int from, int size);
 
     User getUserById(long userId);
+
+    List<UserShortDto> getPopularInitiators(int from, int size);
 }

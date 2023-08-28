@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.explorewithme.user.dto.NewUserRequest;
 import ru.practicum.explorewithme.user.dto.UserDto;
+import ru.practicum.explorewithme.user.dto.UserShortDto;
 import ru.practicum.explorewithme.user.service.UserService;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -48,6 +49,13 @@ public class UserController {
                                      @RequestParam(defaultValue = "10") @Min(1) Integer size) {
         log.debug("Request for getting users ids={}, from={}, size={}", ids, from, size);
         return userService.getAll(ids, from, size);
+    }
+
+    @GetMapping("/popular/initiator")
+    public List<UserShortDto> returnPopularInitiators(@RequestParam(defaultValue = "0") @Min(0) Integer from,
+                                                      @RequestParam(defaultValue = "10") @Min(10) Integer size) {
+        log.debug("Request getting popular initiators, from={}, size={}", from, size);
+        return userService.getPopularInitiators(from, size);
     }
 
 }
