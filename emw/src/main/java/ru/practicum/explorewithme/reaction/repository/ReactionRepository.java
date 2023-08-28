@@ -16,7 +16,8 @@ public interface ReactionRepository extends JpaRepository<Reaction, Long> {
             "from Reaction react " +
             "join react.event ev " +
             "where ev.id = :eventId " +
-            "and react.positive = true")
+            "and react.positive = true " +
+            "group by ev.id")
     Optional<Likes> findEventLikes(long eventId);
 
     @Query("select ev.id as eventId, count(react.positive) as likes " +
@@ -31,7 +32,8 @@ public interface ReactionRepository extends JpaRepository<Reaction, Long> {
             "from Reaction react " +
             "join react.event ev " +
             "where ev.id = :eventId " +
-            "and react.positive = false")
+            "and react.positive = false " +
+            "group by ev.id")
     Optional<Dislikes> findEventDislikes(long eventId);
 
     @Query("select ev.id as eventId, count(react.positive) as dislikes " +
