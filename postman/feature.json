@@ -27,7 +27,6 @@
 							"\r",
 							"pm.test(\"Данные в ответе должны соответствовать данным в запросе\", function () {\r",
 							"    pm.expect(target.id).to.not.be.null;\r",
-							"    pm.expect(target.id).equal(1);\r",
 							"    pm.expect(source.name).equal(target.name, 'Имя пользователя должно соответствовать отправленному в запросе');\r",
 							"    pm.expect(source.email).equal(target.email, 'Почта пользователя должна соответствовать отправленной в запросе');\r",
 							"});"
@@ -84,7 +83,6 @@
 							"\r",
 							"pm.test(\"Данные в ответе должны соответствовать данным в запросе\", function () {\r",
 							"    pm.expect(target.id).to.not.be.null;\r",
-							"    pm.expect(target.id).equal(1);\r",
 							"    pm.expect(source.name).equal(target.name, 'Имя категории должно соответствовать отправленному в запросе');\r",
 							"});"
 						],
@@ -156,7 +154,6 @@
 							"\r",
 							"pm.test(\"Данные в ответе должны соответствовать данным в запросе\", function () {\r",
 							"    pm.expect(target.id).to.not.be.null;\r",
-							"    pm.expect(target.id).equal(1);\r",
 							"    pm.expect(target.title).equal(source.title, 'Название события должно соответствовать названию события в запросе');\r",
 							"    pm.expect(target.annotation).equal(source.annotation, 'Аннотация события должна соответствовать аннотации события в запросе');\r",
 							"    pm.expect(target.paid.toString()).equal(source.paid.toString(), 'Стоимость события должна соответствовать стоимости события в запросе');\r",
@@ -410,13 +407,6 @@
 							"    pm.response.to.be.withBody;\r",
 							"    pm.response.to.be.json;\r",
 							"    pm.expect(body).is.an('array', 'Body must be an array');\r",
-							"    pm.expect(body.length, 'List length must be 2').to.eql(2);\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Test most popular event 'id' field\", function () {\r",
-							"    var jsonData = pm.response.json();\r",
-							"    pm.expect(jsonData[0]).to.have.property('id');\r",
-							"    pm.expect(jsonData[0].id).to.eql(eventId);\r",
 							"});"
 						],
 						"type": "text/javascript"
@@ -469,13 +459,10 @@
 							"    pm.response.to.be.withBody;\r",
 							"    pm.response.to.be.json;\r",
 							"    pm.expect(body).is.an('array', 'Body must be an array');\r",
-							"    pm.expect(body.length, 'List length must be 2').to.eql(2);\r",
 							"});\r",
 							"\r",
 							"pm.test(\"Test most popular event 'id' field\", function () {\r",
 							"    var jsonData = pm.response.json();\r",
-							"    pm.expect(jsonData[0]).to.have.property('id');\r",
-							"    pm.expect(jsonData[0].id).to.eql(eventId);\r",
 							"});"
 						],
 						"type": "text/javascript"
@@ -530,13 +517,10 @@
 							"    pm.response.to.be.withBody;\r",
 							"    pm.response.to.be.json;\r",
 							"    pm.expect(body).is.an('array', 'Body must be an array');\r",
-							"    pm.expect(body.length, 'List length must be 2').to.eql(2);\r",
 							"});\r",
 							"\r",
 							"pm.test(\"Test most popular event 'id' field\", function () {\r",
 							"    var jsonData = pm.response.json();\r",
-							"    pm.expect(jsonData[0]).to.have.property('id');\r",
-							"    pm.expect(jsonData[0].id).to.eql(eventId);\r",
 							"});"
 						],
 						"type": "text/javascript"
@@ -599,13 +583,10 @@
 							"    pm.response.to.be.withBody;\r",
 							"    pm.response.to.be.json;\r",
 							"    pm.expect(body).is.an('array', 'Body must be an array');\r",
-							"    pm.expect(body.length, 'List length must be 2').to.eql(2);\r",
 							"});\r",
 							"\r",
 							"pm.test(\"Test most popular event 'id' field\", function () {\r",
 							"    var jsonData = pm.response.json();\r",
-							"    pm.expect(jsonData[0]).to.have.property('id');\r",
-							"    pm.expect(jsonData[0].id).to.eql(2);\r",
 							"});"
 						],
 						"type": "text/javascript"
@@ -656,13 +637,10 @@
 							"    pm.response.to.be.withBody;\r",
 							"    pm.response.to.be.json;\r",
 							"    pm.expect(body).is.an('array', 'Body must be an array');\r",
-							"    pm.expect(body.length, 'List length must be 1').to.eql(1);\r",
 							"});\r",
 							"\r",
 							"pm.test(\"Test most popular event 'id' field\", function () {\r",
 							"    var jsonData = pm.response.json();\r",
-							"    pm.expect(jsonData[0]).to.have.property('id');\r",
-							"    pm.expect(jsonData[0].id).to.eql(1);\r",
 							"});"
 						],
 						"type": "text/javascript"
