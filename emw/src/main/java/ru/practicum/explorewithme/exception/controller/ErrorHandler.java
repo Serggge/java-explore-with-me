@@ -188,16 +188,4 @@ public class ErrorHandler {
                 .build();
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ApiError handleThrowable(Throwable exception) {
-        log.error("Unknown error: {}", exception.getMessage(), exception);
-        return ApiError.builder()
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.name())
-                .reason("UNKNOWN ERROR.")
-                .message(exception.getMessage())
-                .timestamp(LocalDateTime.now().format(DATE_FORMAT))
-                .build();
-    }
-
 }
