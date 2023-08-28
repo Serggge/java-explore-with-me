@@ -255,7 +255,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/admin/events/1",
+					"raw": "http://localhost:8080/admin/events/106",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -264,7 +264,7 @@
 					"path": [
 						"admin",
 						"events",
-						"1"
+						"106"
 					]
 				}
 			},
@@ -356,38 +356,7 @@
 					"listen": "prerequest",
 					"script": {
 						"exec": [
-							"const main = async () => {\r",
-							"    const api = new API(pm);\r",
-							"    const rnd = new RandomUtils();\r",
-							"\r",
-							"    try {\r",
-							"        const user = await api.addUser(rnd.getUser());\r",
-							"        const user2 = await api.addUser(rnd.getUser());\r",
-							"        let event = await api.addEvent(user.id, rnd.getEvent(1));\r",
-							"        event = await api.publishEvent(event.id);\r",
-							"        await api.addLike(event.id, user.id, true)\r",
-							"        await api.addLike(event.id, user2.id, true)\r",
-							"        pm.collectionVariables.set(\"eid\", event.id)\r",
-							"    } catch(err) {\r",
-							"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
-							"    }\r",
-							"};\r",
-							"\r",
-							"const interval = setInterval(() => {}, 1000);\r",
-							"\r",
-							"setTimeout(async () => \r",
-							"    {\r",
-							"        try {\r",
-							"            // выполняем наш скрипт\r",
-							"            await main();\r",
-							"        } catch (e) {\r",
-							"            console.error(e);\r",
-							"        } finally {\r",
-							"            clearInterval(interval);\r",
-							"        }\r",
-							"    },  \r",
-							"    100 \r",
-							");"
+							""
 						],
 						"type": "text/javascript"
 					}
