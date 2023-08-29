@@ -22,6 +22,7 @@ import ru.practicum.explorewithme.event.dto.Sorting;
 import ru.practicum.explorewithme.event.dto.UpdateEventRequest;
 import ru.practicum.explorewithme.event.model.EventState;
 import ru.practicum.explorewithme.event.service.EventService;
+import ru.practicum.explorewithme.reaction.dto.CategoriesDto;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -126,5 +127,29 @@ public class EventController {
     @GetMapping("/admin/events/all")
     public List<EventFullDto> returnAll() {
         return eventService.getAll();
+    }
+
+    @GetMapping("/popular/category/{categoryId}")
+    public List<EventShortDto> returnPopularEvents(@PathVariable Long categoryId,
+                                                   @RequestParam(defaultValue = "0") @Min(0) Integer from,
+                                                   @RequestParam(defaultValue = "10") @Min(10) Integer size) {
+        log.debug("Request getting popular events by category with id={}, from={}, size={}", categoryId, from, size);
+        return eventService.getPopularEvents(categoryId, from, size);
+    }
+
+    @GetMapping("/popular/category")
+    public List<EventShortDto> returnPopularEvents(@RequestBody CategoriesDto categoriesDto,
+                                                   @RequestParam(defaultValue = "0") @Min(0) Integer from,
+                                                   @RequestParam(defaultValue = "10") @Min(10) Integer size) {
+        log.debug("Request getting popular events by category list={}, from={}, size={}", categoriesDto, from, size);
+        return eventService.getPopularEvents(categoriesDto, from, size);
+    }
+
+    @GetMapping("/popular")
+    public List<EventShortDto> returnPopularByPartEventName(@RequestParam @Length(min = 2) String text,
+                                                            @RequestParam(defaultValue = "0") @Min(0) Integer from,
+                                                            @RequestParam(defaultValue = "10") @Min(10) Integer size) {
+        log.debug("Request get popular events by part of name={}, from={}, size={}", text, from, size);
+        return eventService.getPopularByPartName(text, from, size);
     }
 }

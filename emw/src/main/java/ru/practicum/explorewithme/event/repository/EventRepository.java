@@ -5,10 +5,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.explorewithme.event.model.Event;
+import ru.practicum.explorewithme.event.repository.dao.EventDao;
 import java.util.List;
 import java.util.Optional;
 
-public interface EventRepository extends JpaRepository<Event, Long> {
+public interface EventRepository extends JpaRepository<Event, Long>, EventDao {
 
     Optional<Event> findByIdAndPublishedNotNull(Long eventId);
 

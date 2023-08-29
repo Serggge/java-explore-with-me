@@ -7,6 +7,7 @@ import ru.practicum.explorewithme.event.dto.Sorting;
 import ru.practicum.explorewithme.event.dto.UpdateEventRequest;
 import ru.practicum.explorewithme.event.model.Event;
 import ru.practicum.explorewithme.event.model.EventState;
+import ru.practicum.explorewithme.reaction.dto.CategoriesDto;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,4 +38,10 @@ public interface EventService {
     List<Event> getEvents(Iterable<Long> ids);
 
     List<EventFullDto> getAll();
+
+    List<EventShortDto> getPopularEvents(Long categoryId, int from, int size);
+
+    List<EventShortDto> getPopularEvents(CategoriesDto catDto, int from, int size);
+
+    List<EventShortDto> getPopularByPartName(String text, int from, int size);
 }

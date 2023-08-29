@@ -8,12 +8,14 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.practicum.explorewithme.exception.clientServer.ServerResponseException;
 import ru.practicum.explorewithme.exception.dto.ApiError;
 import ru.practicum.explorewithme.exception.illegal.CategoryNotEmptyException;
 import ru.practicum.explorewithme.exception.illegal.EntityExistsException;
 import ru.practicum.explorewithme.exception.illegal.EntityIllegalArgumentException;
 import ru.practicum.explorewithme.exception.illegal.EntityStateException;
 import ru.practicum.explorewithme.exception.illegal.EventStateException;
+import ru.practicum.explorewithme.exception.illegal.ReactionStateException;
 import ru.practicum.explorewithme.exception.illegal.RequestLimitException;
 import ru.practicum.explorewithme.exception.illegal.TimeLimitException;
 import ru.practicum.explorewithme.exception.illegal.UserMatchingException;
@@ -97,7 +99,7 @@ public class ErrorHandler {
     public ApiError handleEntityExistsException(EntityExistsException exception) {
         log.info("{}: {}", exception.getClass().getSimpleName(), exception.getMessage());
         return ApiError.builder()
-                .status(HttpStatus.FORBIDDEN.name())
+                .status(HttpStatus.CONFLICT.name())
                 .reason("For the requested operation the conditions are not met.")
                 .message(exception.getMessage())
                 .timestamp(LocalDateTime.now().format(DATE_FORMAT))
@@ -133,7 +135,7 @@ public class ErrorHandler {
     public ApiError handleTimeLimitException(TimeLimitException exception) {
         log.info("{}: {}", exception.getClass().getSimpleName(), exception.getMessage());
         return ApiError.builder()
-                .status(HttpStatus.FORBIDDEN.name())
+                .status(HttpStatus.CONFLICT.name())
                 .reason("For the requested operation the conditions are not met.")
                 .message(exception.getMessage())
                 .timestamp(LocalDateTime.now().format(DATE_FORMAT))
@@ -145,7 +147,7 @@ public class ErrorHandler {
     public ApiError handleUserMatchingException(UserMatchingException exception) {
         log.info("{}: {}", exception.getClass().getSimpleName(), exception.getMessage());
         return ApiError.builder()
-                .status(HttpStatus.FORBIDDEN.name())
+                .status(HttpStatus.CONFLICT.name())
                 .reason("For the requested operation the conditions are not met.")
                 .message(exception.getMessage())
                 .timestamp(LocalDateTime.now().format(DATE_FORMAT))
@@ -157,7 +159,7 @@ public class ErrorHandler {
     public ApiError handleEventStateException(EventStateException exception) {
         log.info("{}: {}", exception.getClass().getSimpleName(), exception.getMessage());
         return ApiError.builder()
-                .status(HttpStatus.FORBIDDEN.name())
+                .status(HttpStatus.CONFLICT.name())
                 .reason("For the requested operation the conditions are not met.")
                 .message(exception.getMessage())
                 .timestamp(LocalDateTime.now().format(DATE_FORMAT))
@@ -169,7 +171,7 @@ public class ErrorHandler {
     public ApiError handleRequestLimitException(RequestLimitException exception) {
         log.info("{}: {}", exception.getClass().getSimpleName(), exception.getMessage());
         return ApiError.builder()
-                .status(HttpStatus.FORBIDDEN.name())
+                .status(HttpStatus.CONFLICT.name())
                 .reason("For the requested operation the conditions are not met.")
                 .message(exception.getMessage())
                 .timestamp(LocalDateTime.now().format(DATE_FORMAT))
@@ -181,9 +183,33 @@ public class ErrorHandler {
     public ApiError handleEntityStateException(EntityStateException exception) {
         log.info("{}: {}", exception.getClass().getSimpleName(), exception.getMessage());
         return ApiError.builder()
-                .status(HttpStatus.FORBIDDEN.name())
+                .status(HttpStatus.CONFLICT.name())
                 .reason("For the requested operation the conditions are not met.")
                 .message(exception.getMessage())
+                .timestamp(LocalDateTime.now().format(DATE_FORMAT))
+                .build();
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleReactionStateException(ReactionStateException exception) {
+        log.info("{}: {}", exception.getClass().getSimpleName(), exception.getMessage());
+        return ApiError.builder()
+                .status(HttpStatus.CONFLICT.name())
+                .reason("For the requested operation the conditions are not met.")
+                .message(exception.getMessage())
+                .timestamp(LocalDateTime.now().format(DATE_FORMAT))
+                .build();
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public ApiError handleServerResponseException(ServerResponseException exception) {
+        log.error("{}: {}", exception.getClass().getSimpleName(), exception.getMessage());
+        return ApiError.builder()
+                .status(HttpStatus.SERVICE_UNAVAILABLE.name())
+                .reason("Server is not available.")
+                .message("Statistic server is not available")
                 .timestamp(LocalDateTime.now().format(DATE_FORMAT))
                 .build();
     }

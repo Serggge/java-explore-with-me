@@ -1,7 +1,6 @@
 package ru.practicum.explorewithme.event.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -18,18 +17,22 @@ import ru.practicum.explorewithme.event.model.Event;
 import ru.practicum.explorewithme.event.model.EventState;
 import ru.practicum.explorewithme.event.model.StateAction;
 import ru.practicum.explorewithme.event.repository.EventRepository;
-import ru.practicum.explorewithme.event.repository.dao.EventDao;
 import ru.practicum.explorewithme.event.service.EventMapper;
 import ru.practicum.explorewithme.event.service.EventService;
 import ru.practicum.explorewithme.exception.illegal.EventStateException;
 import ru.practicum.explorewithme.exception.illegal.UserMatchingException;
 import ru.practicum.explorewithme.exception.illegal.TimeLimitException;
 import ru.practicum.explorewithme.exception.notFound.EventNotFoundException;
+import ru.practicum.explorewithme.reaction.dto.CategoriesDto;
+import ru.practicum.explorewithme.reaction.repository.ReactionRepository;
+import ru.practicum.explorewithme.reaction.repository.view.EventLikes;
+import ru.practicum.explorewithme.reaction.repository.view.ReactionView;
 import ru.practicum.explorewithme.request.repository.EventRequestRepository;
 import ru.practicum.explorewithme.statistic.StatProxyService;
 import ru.practicum.explorewithme.user.service.UserService;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -37,21 +40,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import static ru.practicum.explorewithme.util.Constants.APP_NAME;
 
 @Service
 @RequiredArgsConstructor(onConstructor__ = @Autowired)
-@Setter
 @Slf4j
 public class EventServiceImpl implements EventService {
 
     private final CategoryService categoryService;
     private final UserService userService;
     private final StatProxyService statService;
+    private final ReactionRepository reactionRepository;
     private final EventRepository eventRepository;
-    private final EventDao eventDao;
     private final EventRequestRepository eventRequestRepository;
     private final EventMapper eventMapper;
 
@@ -62,6 +66,7 @@ public class EventServiceImpl implements EventService {
         ViewStats statDto = statService.addHit(APP_NAME, "/events/" + eventId, servletRequest.getRemoteAddr());
         foundedEvent.setViews(statDto.getHits());
         fillRequestInfo(foundedEvent);
+        fillReactions(foundedEvent);
         return eventMapper.mapToFullDto(foundedEvent);
     }
 
@@ -94,6 +99,7 @@ public class EventServiceImpl implements EventService {
         ViewStats statDto = statService.addHit(APP_NAME, "/events/" + eventId, servletRequest.getRemoteAddr());
         userEvent.setViews(statDto.getHits());
         fillRequestInfo(userEvent);
+        fillReactions(userEvent);
         return eventMapper.mapToFullDto(userEvent);
     }
 
@@ -108,6 +114,7 @@ public class EventServiceImpl implements EventService {
             log.info("Event updated: {}", updatedEvent);
             fillStatistic(updatedEvent);
             fillRequestInfo(updatedEvent);
+            fillReactions(updatedEvent);
             return eventMapper.mapToFullDto(updatedEvent);
         } else {
             throw new EventStateException("Only pending or canceled events can be changed");
@@ -135,6 +142,7 @@ public class EventServiceImpl implements EventService {
             log.info("Event updated: {}", updatedEvent);
             fillStatistic(updatedEvent);
             fillRequestInfo(updatedEvent);
+            fillReactions(updatedEvent);
             return eventMapper.mapToFullDto(updatedEvent);
         }
     }
@@ -143,7 +151,7 @@ public class EventServiceImpl implements EventService {
     public List<EventFullDto> getEventsAdminRequest(List<Long> userIds, List<EventState> states, List<Long> categories,
                                                     LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                                     Integer from, Integer size) {
-        List<Event> events = eventDao.findEventsAdminRequest(userIds, states, categories, rangeStart, rangeEnd, from, size);
+        List<Event> events = eventRepository.findEventsAdminRequest(userIds, states, categories, rangeStart, rangeEnd, from, size);
         fillStatistic(events);
         fillRequestInfo(events);
         return eventMapper.mapToFullDto(events);
@@ -154,7 +162,7 @@ public class EventServiceImpl implements EventService {
                                                       LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                                       Boolean onlyAvailable, Sorting sort, Integer from, Integer size,
                                                       HttpServletRequest servletRequest) {
-        List<Event> events = eventDao.findEventsPublicRequest(text, categories, paid, rangeStart, rangeEnd, sort, from, size);
+        List<Event> events = eventRepository.findEventsPublicRequest(text, categories, paid, rangeStart, rangeEnd, sort, from, size);
         if (onlyAvailable && sort == Sorting.VIEWS) {
             events = events.stream()
                     .filter(event -> event.getConfirmedRequests() < event.getParticipantLimit()
@@ -194,6 +202,40 @@ public class EventServiceImpl implements EventService {
         return events;
     }
 
+    @Override
+    public List<EventFullDto> getAll() {
+        return eventMapper.mapToFullDto(eventRepository.findAll())
+                .stream()
+                .sorted(Comparator.comparingLong(EventFullDto::getId))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<EventShortDto> getPopularEvents(Long categoryId, int from, int size) {
+        List<Event> events = likesViewToEvents(reactionRepository.findReactionsByCategory(
+                categoryId, PageRequest.of(from, size)));
+        fillRequestInfo(events);
+        fillStatistic(events);
+        return eventMapper.mapToShortDto(events);
+    }
+
+    @Override
+    public List<EventShortDto> getPopularEvents(CategoriesDto catDto, int from, int size) {
+        List<Event> events = likesViewToEvents(reactionRepository.findPopularEvents(catDto.getCategoryIds(),
+                catDto.getCategoryNames(), PageRequest.of(from, size)));
+        fillRequestInfo(events);
+        fillStatistic(events);
+        return eventMapper.mapToShortDto(events);
+    }
+
+    @Override
+    public List<EventShortDto> getPopularByPartName(String text, int from, int size) {
+        List<Event> events = likesViewToEvents(reactionRepository.findPopularEvents(text, PageRequest.of(from, size)));
+        fillRequestInfo(events);
+        fillStatistic(events);
+        return eventMapper.mapToShortDto(events);
+    }
+
     private void validateEventStartDate(LocalDateTime dtoEventDate, LocalDateTime otherDate, int hours) {
         if (dtoEventDate != null && otherDate != null && dtoEventDate.isBefore(otherDate.plusHours(hours))) {
             throw new TimeLimitException("Less than two hours before start of event");
@@ -219,14 +261,6 @@ public class EventServiceImpl implements EventService {
                     String.format("User with id=%d is not initiator of Event with ID=%d", userId, eventId));
         }
         return foundedEvent;
-    }
-
-    @Override
-    public List<EventFullDto> getAll() {
-        return eventMapper.mapToFullDto(eventRepository.findAll())
-                .stream()
-                .sorted(Comparator.comparingLong(EventFullDto::getId))
-                .collect(Collectors.toList());
     }
 
     private void fillStatistic(Event event) {
@@ -280,10 +314,34 @@ public class EventServiceImpl implements EventService {
                 .stream()
                 .map(Event::getId)
                 .collect(Collectors.toSet());
-        Map<Long, Long> requestsMap = eventDao.getRequestsCount(eventsIds);
+        Map<Long, Long> requestsMap = eventRepository.getRequestsCount(eventsIds);
         for (Event event : events) {
             event.setConfirmedRequests(requestsMap.getOrDefault(event.getId(), 0L));
         }
+    }
+
+    private void fillReactions(Event event) {
+        Optional<ReactionView> reactionInfo = reactionRepository.findReactionInfo(event.getId());
+        if (reactionInfo.isPresent()) {
+            ReactionView reactionView = reactionInfo.get();
+            event.setLikes(reactionView.getLikes().orElse(0L));
+            event.setDislikes(reactionView.getDislikes().orElse(0L));
+        } else {
+            event.setLikes(0L);
+            event.setLikes(0L);
+        }
+    }
+
+    private List<Event> likesViewToEvents(List<EventLikes> viewLikes) {
+        List<Event> events = new ArrayList<>();
+        for (EventLikes view : viewLikes) {
+            Event event = view.getEvent();
+            if (view.getLikes() != null) {
+                event.setLikes(view.getLikes());
+            }
+            events.add(event);
+        }
+        return events;
     }
 
 }
