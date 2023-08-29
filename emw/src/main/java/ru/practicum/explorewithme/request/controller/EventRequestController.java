@@ -1,7 +1,6 @@
 package ru.practicum.explorewithme.request.controller;
 
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,7 +23,6 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor(onConstructor__ = @Autowired)
-@Setter
 @Slf4j
 @Validated
 public class EventRequestController {

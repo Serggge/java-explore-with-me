@@ -1,7 +1,6 @@
 package ru.practicum.explorewithme.event.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -25,13 +24,15 @@ import ru.practicum.explorewithme.exception.illegal.UserMatchingException;
 import ru.practicum.explorewithme.exception.illegal.TimeLimitException;
 import ru.practicum.explorewithme.exception.notFound.EventNotFoundException;
 import ru.practicum.explorewithme.reaction.dto.CategoriesDto;
-import ru.practicum.explorewithme.reaction.repository.view.Reactions;
-import ru.practicum.explorewithme.reaction.service.ReactionService;
+import ru.practicum.explorewithme.reaction.repository.ReactionRepository;
+import ru.practicum.explorewithme.reaction.repository.view.EventLikes;
+import ru.practicum.explorewithme.reaction.repository.view.ReactionView;
 import ru.practicum.explorewithme.request.repository.EventRequestRepository;
 import ru.practicum.explorewithme.statistic.StatProxyService;
 import ru.practicum.explorewithme.user.service.UserService;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -39,20 +40,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import static ru.practicum.explorewithme.util.Constants.APP_NAME;
 
 @Service
 @RequiredArgsConstructor(onConstructor__ = @Autowired)
-@Setter
 @Slf4j
 public class EventServiceImpl implements EventService {
 
     private final CategoryService categoryService;
     private final UserService userService;
     private final StatProxyService statService;
-    private final ReactionService reactionService;
+    private final ReactionRepository reactionRepository;
     private final EventRepository eventRepository;
     private final EventRequestRepository eventRequestRepository;
     private final EventMapper eventMapper;
@@ -210,8 +212,8 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventShortDto> getPopularEvents(Long categoryId, int from, int size) {
-        Map<Long, Long> popularity = reactionService.getPopularEvents(categoryId, from, size);
-        List<Event> events = eventRepository.findAllByIds(popularity.keySet());
+        List<Event> events = likesViewToEvents(reactionRepository.findReactionsByCategory(
+                categoryId, PageRequest.of(from, size)));
         fillRequestInfo(events);
         fillStatistic(events);
         return eventMapper.mapToShortDto(events);
@@ -219,8 +221,8 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventShortDto> getPopularEvents(CategoriesDto catDto, int from, int size) {
-        Map<Long, Long> popularity = reactionService.getPopularEvents(catDto, from, size);
-        List<Event> events = eventRepository.findAllByIds(popularity.keySet());
+        List<Event> events = likesViewToEvents(reactionRepository.findPopularEvents(catDto.getCategoryIds(),
+                catDto.getCategoryNames(), PageRequest.of(from, size)));
         fillRequestInfo(events);
         fillStatistic(events);
         return eventMapper.mapToShortDto(events);
@@ -228,8 +230,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventShortDto> getPopularByPartName(String text, int from, int size) {
-        Map<Long, Long> popularity = reactionService.getPopularByPartName(text, from, size);
-        List<Event> events = eventRepository.findAllByIds(popularity.keySet());
+        List<Event> events = likesViewToEvents(reactionRepository.findPopularEvents(text, PageRequest.of(from, size)));
         fillRequestInfo(events);
         fillStatistic(events);
         return eventMapper.mapToShortDto(events);
@@ -320,9 +321,27 @@ public class EventServiceImpl implements EventService {
     }
 
     private void fillReactions(Event event) {
-        Reactions reactions = reactionService.getReactions(event.getId());
-        event.setLikes(reactions.getLikes());
-        event.setDislikes(reactions.getDislikes());
+        Optional<ReactionView> reactionInfo = reactionRepository.findReactionInfo(event.getId());
+        if (reactionInfo.isPresent()) {
+            ReactionView reactionView = reactionInfo.get();
+            event.setLikes(reactionView.getLikes().orElse(0L));
+            event.setDislikes(reactionView.getDislikes().orElse(0L));
+        } else {
+            event.setLikes(0L);
+            event.setLikes(0L);
+        }
+    }
+
+    private List<Event> likesViewToEvents(List<EventLikes> viewLikes) {
+        List<Event> events = new ArrayList<>();
+        for (EventLikes view : viewLikes) {
+            Event event = view.getEvent();
+            if (view.getLikes() != null) {
+                event.setLikes(view.getLikes());
+            }
+            events.add(event);
+        }
+        return events;
     }
 
 }

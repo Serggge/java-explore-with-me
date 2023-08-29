@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.explorewithme.event.dto.EventFullDto;
 import ru.practicum.explorewithme.reaction.service.ReactionService;
+import javax.validation.constraints.Min;
 
 @RestController
 @RequiredArgsConstructor(onConstructor__ = @Autowired)
@@ -24,8 +25,8 @@ public class ReactionController {
 
     @PostMapping("/events/{eventId}/users/{userId}/like")
     @ResponseStatus(HttpStatus.CREATED)
-    public EventFullDto reactToEvent(@PathVariable Long eventId,
-                                     @PathVariable Long userId,
+    public EventFullDto reactToEvent(@PathVariable @Min(1) Long eventId,
+                                     @PathVariable @Min(1) Long userId,
                                      @RequestParam Boolean positive) {
         log.debug("Request add reaction to event with id={}, user with id={}, positive={}", eventId, userId, positive);
         return reactionService.add(eventId, userId, positive);
@@ -33,8 +34,8 @@ public class ReactionController {
 
     @DeleteMapping("/events/{eventId}/users/{userId}/like")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeReact(@PathVariable Long eventId,
-                            @PathVariable Long userId,
+    public void removeReact(@PathVariable @Min(1) Long eventId,
+                            @PathVariable @Min(1) Long userId,
                             @RequestParam Boolean positive) {
         log.debug("Request remove reaction to event with id={}, user with id={}, positive={}", eventId, userId, positive);
         reactionService.delete(eventId, userId, positive);
